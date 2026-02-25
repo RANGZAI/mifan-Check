@@ -48,6 +48,7 @@
                 padding: 0;
             " placeholder="📋" readonly>
             <p style="margin-top: 15px; color: #666; font-size: 13px;">在此框粘贴客户数据验证价格</p>
+            <div id="verifyMsg" style="margin-top: 15px; padding: 12px; border-radius: 8px; font-size: 13px; display: none; text-align: left; background: #f8f9fa; border: 1px solid #dee2e6;"></div>
         </div>
     </div>
 </div>
@@ -276,57 +277,76 @@ function calcRentPrice(cfg, p) {
 }
 
 document.getElementById("verifyBox").addEventListener("paste", function(e) {
-  e.preventDefault();
-  const text = (e.clipboardData || window.clipboardData).getData("text");
-  const box = document.getElementById("verifyBox");
-  const priceMatch = text.match(/回收租金[：:]\s*(\d+(?:\.\d+)?)\s*元/);
-  if (!priceMatch) {
-    box.value = "❌";
-    box.style.color = "#dc3545";
-    setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; }, 2000);
-    return;
-  }
-  const customerPrice = parseFloat(priceMatch[1]);
-  const extractValue = (pattern) => {
-    const match = text.match(pattern);
-    return match ? match[1] : null;
-  };
-  const hafuCoin = parseFloat(extractValue(/哈夫币[纯币]*[：:]\s*(\d+(?:\.\d+)?)/)) || 0;
-  const level = parseInt(extractValue(/等级[：:]\s*(\d+)/)) || 0;
-  const insurance = parseInt(extractValue(/保险格数[：:]\s*(\d+)/)) || 2;
-  const stamina = parseInt(extractValue(/体力[：:]\s*(\d+)/)) || 1;
-  const weight = parseInt(extractValue(/负重[：:]\s*(\d+)/)) || 1;
-  const insuranceCards = parseInt(extractValue(/体验卡[：:]\s*(\d+)/)) || 0;
-  const extractSkins = (pattern) => {
-    const match = text.match(pattern);
-    if (!match) return [];
-    return match[1].split(/[、,，]/).map(s => s.trim()).filter(s => s && s !== '无');
-  };
-  const knifeSkins = extractSkins(/刀皮[：:]\s*(.+?)(?:\n|$)/);
-  const weaponSkins = extractSkins(/武器皮肤[：:]\s*(.+?)(?:\n|$)/);
-  const params = {
-    hafu_coin: hafuCoin,
-    level: level,
-    insurance: insurance,
-    stamina: stamina,
-    weight: weight,
-    knife_skins: knifeSkins,
-    weapon_skins: weaponSkins,
-    insurance_cards: insuranceCards
-  };
-  const ourPrice = calcRentPrice(CFG, params);
-  if (Math.abs(customerPrice - ourPrice) < 1.5) {
-    box.value = "✅";
-    box.style.color = "#28a745";
-  } else {
-    box.value = "❌";
-    box.style.color = "#dc3545";
-  }
-  setTimeout(() => {
-    box.value = "📋";
-    box.style.color = "inherit";
-  }, 2000);
-});
+   e.preventDefault();
+   const text = (e.clipboardData || window.clipboardData).getData("text");
+   const box = document.getElementById("verifyBox");
+   const msgBox = document.getElementById("verifyMsg");
+   const errors = [];
+   
+   const priceMatch = text.match(/回收租金[：:]\s*(\d+(?:\.\d+)?)\s*元/);
+   if (!priceMatch) {
+      box.value = "❌";
+      box.style.color = "#dc3545";
+      msgBox.innerHTML = "❌ <b>缺少数据：</b>找不到回收租金信息";
+      msgBox.style.display = "block";
+      setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 3000);
+      return;
+   }
+   const customerPrice = parseFloat(priceMatch[1]);
+   const extractValue = (pattern) => {
+     const match = text.match(pattern);
+     return match ? match[1] : null;
+   };
+   const hafuCoin = parseFloat(extractValue(/哈夫币[纯币]*[：:]\s*(\d+(?:\.\d+)?)/)) || 0;
+   const level = parseInt(extractValue(/等级[：:]\s*(\d+)/)) || 0;
+   const insurance = parseInt(extractValue(/保险格数[：:]\s*(\d+)/)) || 2;
+   const stamina = parseInt(extractValue(/体力[：:]\s*(\d+)/)) || 1;
+   const weight = parseInt(extractValue(/负重[：:]\s*(\d+)/)) || 1;
+   const insuranceCards = parseInt(extractValue(/体验卡[：:]\s*(\d+)/)) || 0;
+   
+   if (!hafuCoin) errors.push("缺少数据：哈夫币纯币");
+   if (!level) errors.push("缺少数据：等级");
+   
+   const extractSkins = (pattern) => {
+     const match = text.match(pattern);
+     if (!match) return [];
+     return match[1].split(/[、,，]/).map(s => s.trim()).filter(s => s && s !== '无');
+   };
+   const knifeSkins = extractSkins(/刀皮[：:]\s*(.+?)(?:\n|$)/);
+   const weaponSkins = extractSkins(/武器皮肤[：:]\s*(.+?)(?:\n|$)/);
+   const params = {
+     hafu_coin: hafuCoin,
+     level: level,
+     insurance: insurance,
+     stamina: stamina,
+     weight: weight,
+     knife_skins: knifeSkins,
+     weapon_skins: weaponSkins,
+     insurance_cards: insuranceCards
+   };
+   const ourPrice = calcRentPrice(CFG, params);
+   const priceDiff = Math.abs(customerPrice - ourPrice);
+   
+   if (errors.length > 0) {
+     box.value = "❌";
+     box.style.color = "#dc3545";
+     msgBox.innerHTML = "❌ " + errors.map(e => `<b>${e}</b>`).join("<br>");
+     msgBox.style.display = "block";
+     setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 3000);
+   } else if (priceDiff < 1.5) {
+     box.value = "✅";
+     box.style.color = "#28a745";
+     msgBox.style.display = "none";
+     document.getElementById("inputText").value = "";
+     setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; }, 2000);
+   } else {
+     box.value = "❌";
+     box.style.color = "#dc3545";
+     msgBox.innerHTML = `❌ <b>价格不对</b><br>客户报价: ${customerPrice}元<br>系统计算: ${ourPrice}元<br>差异: ${priceDiff.toFixed(1)}元`;
+     msgBox.style.display = "block";
+     setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 3000);
+   }
+ });
 
 document.getElementById("verifyBox").addEventListener("click", function() {
   this.focus();
