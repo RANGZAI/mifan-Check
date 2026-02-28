@@ -1,0 +1,48 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+.container { max-width: 600px; margin: auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); position: relative; }
+
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+h2 { color: #667eea; font-size: 24px; }
+.settings-btn { background: #f0f2f5; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+.settings-btn:hover { background: #667eea; color: white; transform: rotate(20deg); }
+
+.tip { background: #e8f4f8; color: #0066cc; padding: 12px 15px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; border-left: 4px solid #667eea; line-height: 1.6; }
+textarea { width: 100%; height: 120px; margin-bottom: 20px; padding: 15px; border: 2px solid #e8eef5; border-radius: 12px; box-sizing: border-box; font-size: 14px; outline: none; transition: border 0.3s; font-family: inherit; }
+textarea:focus { border-color: #667eea; }
+
+.btn-box { text-align: center; }
+button.main-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px 50px; cursor: pointer; border-radius: 50px; font-size: 16px; font-weight: bold; transition: all 0.3s; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+button.main-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6); }
+
+#status { margin-top: 20px; padding: 15px; border-radius: 10px; text-align: center; display: none; font-weight: bold; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+.verify-section { margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f2f5; }
+.verify-section h3 { color: #667eea; margin-bottom: 15px; font-size: 16px; }
+.verify-box-container { text-align: center; }
+#verifyBox { width: 80px; height: 80px; margin: 0 auto; border: 2px solid #e8eef5; border-radius: 15px; font-size: 40px; text-align: center; cursor: pointer; transition: all 0.3s; background: white; padding: 0; }
+#verifyBox:hover { border-color: #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2); }
+.verify-box-container p { margin-top: 12px; color: #999; font-size: 12px; }
+#verifyMsg { margin-top: 15px; padding: 12px; border-radius: 10px; font-size: 13px; display: none; text-align: left; background: #f8f9fa; border: 1px solid #dee2e6; }
+
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: slideIn 0.3s; }
+@keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.close { color: #999; float: right; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.3s; }
+.close:hover { color: #667eea; }
+
+.modal h2 { color: #667eea; margin-bottom: 20px; font-size: 20px; }
+.profit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.profit-item { }
+.profit-item label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 13px; }
+.profit-item input { width: 100%; padding: 10px; border: 2px solid #e8eef5; border-radius: 8px; font-size: 14px; transition: border 0.3s; }
+.profit-item input:focus { outline: none; border-color: #667eea; }
+.profit-item .unit { margin-left: 8px; color: #667eea; font-weight: bold; }
+
+.modal-buttons { display: flex; gap: 10px; margin-top: 25px; }
+.modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+.btn-save { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.btn-save:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+.btn-cancel { background: #f0f2f5; color: #333; }
+.btn-cancel:hover { background: #e8eef5; }
