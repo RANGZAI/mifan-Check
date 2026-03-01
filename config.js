@@ -1,6 +1,6 @@
 // 共享配置和函数
 const CFG = {
-  base9: 39, base6: 44, base24: 48, bonus_sta7_wgt7: 1, bonus_sta6_wgt6: 0.5, penalty_low: 1,
+  base9: 41, base6: 45, base24: 49, bonus_sta7_wgt7: 1, bonus_sta6_wgt6: 0.5, penalty_low: 1,
   bonus_chixiao: 1, bonus_knife_1: 0.5, bonus_knife_2to3: 1, bonus_knife_4to8: 1.5, bonus_all_knife: 3,
   bonus_weapon: 1, bonus_hafu_201to300: 1, bonus_hafu_301plus: 2,
   card24_1: 0.5, card24_2: 0.5, card24_3: 1.5, card24_4: 2, card24_5: 2.25, card24_6: 2.5, card24_7plus: 2.5,
@@ -26,11 +26,11 @@ function calcRentPrice(cfg, p) {
   const sta = parseInt(p.stamina) || 1;
   const wgt = parseInt(p.weight) || 1;
   if (sta === 7 && wgt === 7) {
-    ratio -= cfg.bonus_sta7_wgt7;
+    ratio += cfg.bonus_sta7_wgt7;
   } else if (sta === 6 && wgt === 6) {
-    ratio -= cfg.bonus_sta6_wgt6;
+    ratio += cfg.bonus_sta6_wgt6;
   } else if (sta <= 3 || wgt <= 3) {
-    ratio += cfg.penalty_low;
+    ratio -= cfg.penalty_low;
   }
   if (hafuM >= 301) {
     ratio += cfg.bonus_hafu_301plus;

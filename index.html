@@ -9,7 +9,6 @@
 <div class="container">
     <div class="header">
         <h2>🚀 数据录入</h2>
-        <button class="settings-btn" onclick="openSettings()">⚙️</button>
     </div>
     
     <div class="tip">💡 在此处 Ctrl+V 粘贴客户数据内容</div>
@@ -29,78 +28,63 @@
             <div id="verifyMsg"></div>
         </div>
     </div>
-</div>
 
-<!-- 设置模态框 -->
-<div id="settingsModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeSettings()">&times;</span>
-        <h2>⚙️ 利润率设置</h2>
+    <div class="profit-settings">
+        <h3>⚙️ 利率调整</h3>
         <div class="profit-grid">
-            <div class="profit-item">
-                <label>最低利润（元）</label>
-                <input type="number" id="minProfit" value="25">
+            <div class="profit-field">
+                <label>最低利润(元)</label>
+                <input type="number" id="minProfit" value="25" min="0">
             </div>
-            <div class="profit-item">
-                <label>正常号利润率 (≤200m)</label>
-                <div style="display: flex; align-items: center;">
-                    <input type="number" id="normalRate" value="18" min="0" max="100" style="flex: 1;">
-                    <span class="unit">%</span>
+            <div class="profit-field">
+                <label>0~100m</label>
+                <div class="input-group">
+                    <input type="number" id="tinyRate" value="18" min="0" max="100">
+                    <span>%</span>
                 </div>
             </div>
-            <div class="profit-item">
-                <label>大额号利润率 (201-300m)</label>
-                <div style="display: flex; align-items: center;">
-                    <input type="number" id="largeRate" value="12" min="0" max="100" style="flex: 1;">
-                    <span class="unit">%</span>
+            <div class="profit-field">
+                <label>101~200m</label>
+                <div class="input-group">
+                    <input type="number" id="normalRate" value="15" min="0" max="100">
+                    <span>%</span>
                 </div>
             </div>
-            <div class="profit-item">
-                <label>超大额利润率 (301-500m)</label>
-                <div style="display: flex; align-items: center;">
-                    <input type="number" id="extraLargeRate" value="10" min="0" max="100" style="flex: 1;">
-                    <span class="unit">%</span>
+            <div class="profit-field">
+                <label>201~300m</label>
+                <div class="input-group">
+                    <input type="number" id="largeRate" value="12" min="0" max="100">
+                    <span>%</span>
                 </div>
             </div>
-            <div class="profit-item">
-                <label>巨大额利润率 (>500m)</label>
-                <div style="display: flex; align-items: center;">
-                    <input type="number" id="hugeRate" value="8" min="0" max="100" style="flex: 1;">
-                    <span class="unit">%</span>
+            <div class="profit-field">
+                <label>301~500m</label>
+                <div class="input-group">
+                    <input type="number" id="extraLargeRate" value="10" min="0" max="100">
+                    <span>%</span>
                 </div>
             </div>
-        </div>
-        <div class="modal-buttons">
-            <button class="btn-save" onclick="closeSettings()">保存</button>
-            <button class="btn-cancel" onclick="closeSettings()">关闭</button>
+            <div class="profit-field">
+                <label>>500m</label>
+                <div class="input-group">
+                    <input type="number" id="hugeRate" value="8" min="0" max="100">
+                    <span>%</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script src="config.js"></script>
 <script>
-function openSettings() {
-    document.getElementById('settingsModal').style.display = 'block';
-}
-
-function closeSettings() {
-    document.getElementById('settingsModal').style.display = 'none';
-}
-
-window.onclick = function(event) {
-    const modal = document.getElementById('settingsModal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
-    }
-}
-
 async function parseAndCopy() {
     const PROFIT_CONFIG = {
         minProfit: parseFloat(document.getElementById('minProfit').value) || 20,
-        normalRate: (parseFloat(document.getElementById('normalRate').value) || 16) / 100,
+        tinyRate: (parseFloat(document.getElementById('tinyRate').value) || 18) / 100,
+        normalRate: (parseFloat(document.getElementById('normalRate').value) || 15) / 100,
         largeRate: (parseFloat(document.getElementById('largeRate').value) || 12) / 100,
-        extraLargeRate: (parseFloat(document.getElementById('extraLargeRate').value) || 8) / 100,
-        hugeRate: (parseFloat(document.getElementById('hugeRate').value) || 5) / 100
+        extraLargeRate: (parseFloat(document.getElementById('extraLargeRate').value) || 10) / 100,
+        hugeRate: (parseFloat(document.getElementById('hugeRate').value) || 8) / 100
     };
     
     const inputBox = document.getElementById('inputText');
@@ -169,13 +153,18 @@ async function parseAndCopy() {
     const pureCoins = parseFloat(data['纯币'].replace(/[Mmb]/gi, '')) || 0;
     const recoveryRent = parseFloat(data['租金']) || 1;
     
-    let targetProfitRate = PROFIT_CONFIG.normalRate;
+    let targetProfitRate = PROFIT_CONFIG.tinyRate;
     if (pureCoins > 500) {
-        targetProfitRate = PROFIT_CONFIG.hugeRate;
+        const excess = pureCoins - 500;
+        const reductions = Math.floor(excess / 200);
+        targetProfitRate = (PROFIT_CONFIG.hugeRate * 100 - reductions) / 100;
+        targetProfitRate = Math.max(targetProfitRate, 0.05);
     } else if (pureCoins > 300) {
         targetProfitRate = PROFIT_CONFIG.extraLargeRate;
     } else if (pureCoins > 200) {
         targetProfitRate = PROFIT_CONFIG.largeRate;
+    } else if (pureCoins > 100) {
+        targetProfitRate = PROFIT_CONFIG.normalRate;
     }
     
     let handlerRent = Math.round(recoveryRent / (1 - targetProfitRate));
@@ -253,8 +242,11 @@ document.getElementById("verifyBox").addEventListener("paste", function(e) {
     lines.forEach(line => {
        line = line.trim();
        if (!line) return;
-       const colonIdx = line.indexOf(':') !== -1 ? line.indexOf(':') : line.indexOf('：');
-       if (colonIdx === -1) return;
+       const colonIdx = Math.min(
+           line.indexOf(':') !== -1 ? line.indexOf(':') : Infinity,
+           line.indexOf('：') !== -1 ? line.indexOf('：') : Infinity
+       );
+       if (colonIdx === Infinity) return;
        const field = line.substring(0, colonIdx).trim();
        let value = line.substring(colonIdx + 1).trim();
        if (!value || value === '无' || value === '-') return;
@@ -300,24 +292,27 @@ document.getElementById("verifyBox").addEventListener("paste", function(e) {
     const ourPrice = calcRentPrice(CFG, params);
     const priceDiff = Math.abs(customerPrice - ourPrice);
     
+    const recoveryRatio = customerPrice > 0 ? (hafuCoin * 100 / customerPrice).toFixed(1) : '0.0';
+    
     if (errors.length > 0) {
        box.value = "❌";
        box.style.color = "#dc3545";
        msgBox.innerHTML = "❌ " + errors.map(e => `<b>${e}</b>`).join("<br>");
        msgBox.style.display = "block";
-       setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 3000);
+       setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 10000);
     } else if (priceDiff < 1.5) {
        box.value = "✅";
        box.style.color = "#28a745";
-       msgBox.style.display = "none";
+       msgBox.innerHTML = `✅ <b>验证通过</b><br>回收比例: ${recoveryRatio}`;
+       msgBox.style.display = "block";
        document.getElementById("inputText").value = "";
-       setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; }, 2000);
+       setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 10000);
     } else {
        box.value = "❌";
        box.style.color = "#dc3545";
-       msgBox.innerHTML = `❌ <b>价格不对</b><br>客户报价: ${customerPrice}元<br>系统计算: ${ourPrice}元<br>差异: ${priceDiff.toFixed(1)}元`;
+       msgBox.innerHTML = `❌ <b>价格不对</b><br>客户报价: ${customerPrice}元<br>系统计算: ${ourPrice}元<br>差异: ${priceDiff.toFixed(1)}元<br>回收比例: ${recoveryRatio}`;
        msgBox.style.display = "block";
-       setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 3000);
+       setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 10000);
     }
 });
 
