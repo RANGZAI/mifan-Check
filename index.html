@@ -34,7 +34,7 @@
         <div class="profit-grid">
             <div class="profit-field">
                 <label>最低利润(元)</label>
-                <input type="number" id="minProfit" value="25" min="0">
+                <input type="number" id="minProfit" value="30" min="0">
             </div>
             <div class="profit-field">
                 <label>0~100m</label>
@@ -73,8 +73,29 @@
             </div>
         </div>
     </div>
+
+    <div class="profit-settings">
+        <h3>🔄 表格数据转标准格式</h3>
+        <div class="tip">💡 粘贴表格行数据（Tab分隔），自动转换为标准格式</div>
+        <textarea id="tableInput" placeholder="粘贴表格数据..." style="min-height: 80px;"></textarea>
+        <div class="btn-box">
+            <button class="main-btn" onclick="convertTableToStandard()">转换为标准格式</button>
+            <button class="main-btn" onclick="convertTableToSimple()" style="margin-left: 10px;">转换为简单数据</button>
+        </div>
+        <div id="convertStatus" style="display:none; margin-top: 10px; padding: 10px; background: #d4edda; color: #155724; border-radius: 4px;">
+            ✅ 转换成功！
+        </div>
+        <div style="margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="margin: 0;">转换结果预览：</h4>
+                <button onclick="copyConvertResult()" style="padding: 6px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">📋 一键复制</button>
+            </div>
+            <pre id="convertPreview" style="background: #f8f9fa; padding: 12px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; font-size: 13px; line-height: 1.6;"></pre>
+        </div>
+    </div>
 </div>
 
+<script src="price-config.js"></script>
 <script src="config.js"></script>
 <script>
 async function parseAndCopy() {
@@ -233,6 +254,7 @@ document.getElementById("verifyBox").addEventListener("paste", function(e) {
        '9格保险体验卡': 'insuranceCards',
        '体验卡': 'insuranceCards',
        '刀皮': 'knifeSkins',
+       '干员红皮': 'operatorRedSkins',
        '武器皮肤': 'weaponSkins',
        '回收租金': 'customerPrice'
     };
@@ -256,7 +278,7 @@ document.getElementById("verifyBox").addEventListener("paste", function(e) {
        
        if (key === 'customerPrice') {
           data[key] = parseFloat(value.replace(/[^\d.]/g, ''));
-       } else if (key === 'knifeSkins' || key === 'weaponSkins') {
+       } else if (key === 'knifeSkins' || key === 'weaponSkins' || key === 'operatorRedSkins') {
           data[key] = value.split(/[、,，]/).map(s => s.trim()).filter(s => s && s !== '无');
        } else if (key === 'hafuCoin') {
           data[key] = parseFloat(value.replace(/[mM]/g, ''));
@@ -273,6 +295,7 @@ document.getElementById("verifyBox").addEventListener("paste", function(e) {
     const weight = data.weight || 1;
     const insuranceCards = data.insuranceCards || 0;
     const knifeSkins = data.knifeSkins || [];
+    const operatorRedSkins = data.operatorRedSkins || [];
     const weaponSkins = data.weaponSkins || [];
     
     if (!hafuCoin) errors.push("缺少数据：哈夫币纯币");
@@ -286,6 +309,7 @@ document.getElementById("verifyBox").addEventListener("paste", function(e) {
        stamina: stamina,
        weight: weight,
        knife_skins: knifeSkins,
+       operator_red_skins: operatorRedSkins,
        weapon_skins: weaponSkins,
        insurance_cards: insuranceCards
     };
@@ -319,6 +343,212 @@ document.getElementById("verifyBox").addEventListener("paste", function(e) {
 document.getElementById("verifyBox").addEventListener("click", function() {
    this.focus();
 });
+
+async function convertTableToStandard() {
+    const inputBox = document.getElementById('tableInput');
+    const text = inputBox.value.trim();
+    
+    if (!text) {
+        alert("请粘贴表格数据！");
+        return;
+    }
+    
+    // 按Tab分隔数据
+    const fields = text.split('\t');
+    
+    // 根据实际表格格式解析
+    // 未出租	qq1号	m68131	298m	青铜	0	60	6 (9格体验卡7天)	6	6	40	4	4	暗星 / 蚀金玫瑰 / 红狼-电锯惊魂	qq账密	38	797	350	1147	42	701	96	2026/3/2 12:11	19155182035
+    
+    if (fields.length < 20) {
+        alert("数据格式不正确！请确保粘贴完整的表格行数据。");
+        return;
+    }
+    
+    const hafuCoin = fields[3] || '';
+    const rank = fields[4] || '';
+    const kd = fields[5] || '';
+    const level = fields[6] || '';
+    const insuranceRaw = fields[7] || '';
+    const stamina = fields[8] || '';
+    const weight = fields[9] || '';
+    const awm = fields[10] || '';
+    const head6 = fields[11] || '';
+    const armor6 = fields[12] || '';
+    const skins = fields[13] || '无';
+    const loginMethod = fields[14] || '';
+    const deposit = fields[17] || '';
+    const recoveryRent = fields[20] || '';
+    const phone = fields[23] || '';
+    
+    // 解析保险格数和体验卡
+    let insurance = insuranceRaw;
+    let experienceCard = '0';
+    const insuranceMatch = insuranceRaw.match(/^(\d+)/);
+    const cardMatch = insuranceRaw.match(/体验卡(\d+)/);
+    if (insuranceMatch) {
+        insurance = insuranceMatch[1];
+    }
+    if (cardMatch) {
+        experienceCard = cardMatch[1];
+    }
+    
+    // 解析皮肤信息
+    let knifeSkin = '无';
+    let redSkin = '';
+    let goldSkin = '';
+    let weaponSkin = '无';
+    
+    if (skins && skins !== '无') {
+        const skinParts = skins.split(' / ');
+        skinParts.forEach(part => {
+            part = part.trim();
+            if (part.includes('天际线')) {
+                redSkin = part;
+            } else if (part.includes('红狼') || part.includes('露娜') || part.includes('金牌')) {
+                if (goldSkin) {
+                    goldSkin += '、' + part;
+                } else {
+                    goldSkin = part;
+                }
+            } else if (part.includes('刀') || part.includes('匕首')) {
+                knifeSkin = part;
+            } else {
+                // 其他可能是武器皮肤
+                if (weaponSkin === '无') {
+                    weaponSkin = part;
+                } else {
+                    weaponSkin += '、' + part;
+                }
+            }
+        });
+    }
+    
+    // 转换登录方式
+    let loginText = 'VX扫码';
+    if (loginMethod.includes('qq扫码')) {
+        loginText = 'QQ扫码';
+    } else if (loginMethod.includes('qq账密')) {
+        loginText = 'QQ账号密码';
+    } else if (loginMethod.includes('vx扫码')) {
+        loginText = 'VX扫码';
+    }
+    
+    // 生成标准格式
+    let insuranceText = `保险格数: ${insurance}格`;
+    if (experienceCard !== '0') {
+        insuranceText += `\n9格保险体验卡: ${experienceCard}张`;
+    }
+    
+    const standardFormat = `===== 米饭商行 - 三角洲租号信息 =====
+上号方式: ${loginText}
+段位: ${rank}
+绝密KD: ${kd}
+哈夫币纯币: ${hafuCoin.toUpperCase()}
+等级: ${level}
+${insuranceText}
+体力: ${stamina}
+负重: ${weight}
+AWM子弹数量: ${awm}
+6头数量: ${head6}
+6甲数量: ${armor6}
+刀皮: ${knifeSkin}
+干员红皮: ${redSkin || '无'}
+干员金皮: ${goldSkin || '无'}
+武器皮肤: ${weaponSkin}
+联系号码: ${phone}
+押金: ${deposit}元
+回收租金: ${recoveryRent}元
+=========================`;
+    
+    // 显示预览
+    document.getElementById('convertPreview').textContent = standardFormat;
+    
+    // 复制到剪贴板
+    try {
+        await navigator.clipboard.writeText(standardFormat);
+        const statusDiv = document.getElementById('convertStatus');
+        statusDiv.style.display = 'block';
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 3000);
+    } catch (err) {
+        alert('复制失败，请手动复制预览内容');
+    }
+}
+
+async function copyConvertResult() {
+    const previewBox = document.getElementById('convertPreview');
+    const text = previewBox.textContent;
+    
+    if (!text || text.trim() === '') {
+        alert("没有可复制的内容！请先转换数据。");
+        return;
+    }
+    
+    try {
+        await navigator.clipboard.writeText(text);
+        const statusDiv = document.getElementById('convertStatus');
+        statusDiv.textContent = '✅ 复制成功！';
+        statusDiv.style.display = 'block';
+        
+        // 清空输入框
+        document.getElementById('tableInput').value = '';
+        
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+            statusDiv.textContent = '✅ 转换成功！';
+        }, 2000);
+    } catch (err) {
+        alert('复制失败，请手动复制预览内容');
+    }
+}
+
+async function convertTableToSimple() {
+    const inputBox = document.getElementById('tableInput');
+    const text = inputBox.value.trim();
+    
+    if (!text) {
+        alert("请粘贴表格数据！");
+        return;
+    }
+    
+    const fields = text.split('\t');
+    
+    if (fields.length < 20) {
+        alert("数据格式不正确！请确保粘贴完整的表格行数据。");
+        return;
+    }
+    
+    const accountNum = fields[2] || '';
+    const hafuCoin = fields[3] || '';
+    const insuranceRaw = fields[7] || '';
+    const stamina = fields[8] || '';
+    const weight = fields[9] || '';
+    const skins = fields[13] || '无';
+    const playerRatio = fields[15] || '';
+    
+    const insuranceMatch = insuranceRaw.match(/^(\d+)/);
+    const insurance = insuranceMatch ? insuranceMatch[1] : insuranceRaw;
+    
+    const coinNum = hafuCoin.replace(/[mM]/gi, '');
+    
+    let skinText = skins === '无' ? '无皮肤' : skins;
+    
+    const simpleFormat = `编号${accountNum}，${coinNum}m纯币${playerRatio}比例出，${insurance}-${stamina}-${weight}，${skinText}，有人要私聊我`;
+    
+    document.getElementById('convertPreview').textContent = simpleFormat;
+    
+    try {
+        await navigator.clipboard.writeText(simpleFormat);
+        const statusDiv = document.getElementById('convertStatus');
+        statusDiv.style.display = 'block';
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 3000);
+    } catch (err) {
+        alert('复制失败，请手动复制预览内容');
+    }
+}
 </script>
 </body>
 </html>
