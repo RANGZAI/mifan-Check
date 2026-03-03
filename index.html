@@ -315,8 +315,14 @@ document.getElementById("verifyBox").addEventListener("paste", function(e) {
     };
     const ourPrice = calcRentPrice(CFG, params);
     const priceDiff = Math.abs(customerPrice - ourPrice);
-    
     const recoveryRatio = customerPrice > 0 ? (hafuCoin * 100 / customerPrice).toFixed(1) : '0.0';
+    const analysis = analyzeRatio(CFG, params);
+    const detailsHtml = `<div style="margin-top:10px;padding:12px;background:#f8f9fa;border-radius:6px;font-size:12px;text-align:left;line-height:1.8;border-left:3px solid #007bff;">
+      <div style="margin-bottom:8px;font-weight:600;color:#333;">${analysis.summary}</div>
+      <div style="border-top:1px solid #dee2e6;padding-top:8px;margin-top:8px;">
+        ${analysis.changes.join('<br>')}
+      </div>
+    </div>`;
     
     if (errors.length > 0) {
        box.value = "❌";
@@ -327,16 +333,16 @@ document.getElementById("verifyBox").addEventListener("paste", function(e) {
     } else if (priceDiff < 1.5) {
        box.value = "✅";
        box.style.color = "#28a745";
-       msgBox.innerHTML = `✅ <b>验证通过</b><br>回收比例: ${recoveryRatio}`;
+       msgBox.innerHTML = `✅ <b>验证通过</b><br>回收比例: ${recoveryRatio}${detailsHtml}`;
        msgBox.style.display = "block";
        document.getElementById("inputText").value = "";
-       setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 10000);
+       setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 15000);
     } else {
        box.value = "❌";
        box.style.color = "#dc3545";
-       msgBox.innerHTML = `❌ <b>价格不对</b><br>客户报价: ${customerPrice}元<br>系统计算: ${ourPrice}元<br>差异: ${priceDiff.toFixed(1)}元<br>回收比例: ${recoveryRatio}`;
+       msgBox.innerHTML = `❌ <b>价格不对</b><br>客户报价: ${customerPrice}元<br>系统计算: ${ourPrice}元<br>差异: ${priceDiff.toFixed(1)}元<br>回收比例: ${recoveryRatio}${detailsHtml}`;
        msgBox.style.display = "block";
-       setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 10000);
+       setTimeout(() => { box.value = "📋"; box.style.color = "inherit"; msgBox.style.display = "none"; }, 15000);
     }
 });
 

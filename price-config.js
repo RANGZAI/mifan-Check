@@ -28,9 +28,13 @@ const CFG = {
   // 【特殊干员红皮】凌霄戍卫
   bonus_lingxiao: 2,
 
-  // 【哈夫币惩罚】
-  bonus_hafu_201to300: 1, // 201-300M
-  bonus_hafu_301plus: 2,  // ≥301M
+  // 【哈夫币惩罚】大额降价，促进租赁
+  bonus_hafu_201to300: 1,   // 201-300M
+  bonus_hafu_301to400: 2,   // 301-400M
+  bonus_hafu_401to500: 2.5, // 401-500M
+  bonus_hafu_501to600: 3,   // 501-600M
+  bonus_hafu_601to800: 3.5, // 601-800M
+  bonus_hafu_801plus: 4,    // ≥801M
 
   // 【体验卡加成 · 2格/4格保险】
   card24_1: 0.5,
