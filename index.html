@@ -532,6 +532,7 @@ async function convertTableToSimple() {
     const weight = fields[9] || '';
     const skins = fields[13] || '无';
     const playerRatio = fields[15] || '';
+    const playerRent = fields[16] || '';
     
     const insuranceMatch = insuranceRaw.match(/^(\d+)/);
     const insurance = insuranceMatch ? insuranceMatch[1] : insuranceRaw;
@@ -540,7 +541,7 @@ async function convertTableToSimple() {
     
     let skinText = skins === '无' ? '无皮肤' : skins;
     
-    const simpleFormat = `编号${accountNum}，${coinNum}m纯币${playerRatio}比例出，${insurance}-${stamina}-${weight}，${skinText}，有人要私聊我`;
+    const simpleFormat = `编号${accountNum}，${coinNum}m纯币${playerRatio}比例出，租金${playerRent}，${insurance}-${stamina}-${weight}，${skinText}，有人要私聊我`;
     
     document.getElementById('convertPreview').textContent = simpleFormat;
     
