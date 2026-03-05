@@ -131,7 +131,7 @@ async function parseAndCopy() {
         '金皮': /干员金皮:\s*(.*?)(?:\n|$)/,
         '武器皮肤': /武器皮肤:\s*(.*?)(?:\n|$)/,
         '上号方式': /上号方式:\s*(.*?)(?:\n|$)/,
-        '联系号码': /联系号码:\s*(\d+)/,
+        '联系号码': /联系号码:\s*([^\n]+)/,
         '租金': /回收租金:\s*([\d\.]+)/,
         '押金': /押金:\s*([\d\.]+)/
     };
@@ -226,7 +226,7 @@ async function parseAndCopy() {
         data['租金'],
         profit,
         timeStr,
-        data['联系号码'].replace(/\D/g, '')
+        data['联系号码']
     ];
 
     const finalString = rowArray.join('\t');

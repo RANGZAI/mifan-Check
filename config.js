@@ -227,3 +227,4 @@ function analyzeRatio(cfg, p) {
   
   return { base: baseRatio, changes: changes, summary: summary, finalRatio: finalRatio };
 }
+
