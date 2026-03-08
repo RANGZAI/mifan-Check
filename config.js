@@ -54,9 +54,25 @@ function calcRentPrice(cfg, p) {
   if (weaponSkins.some((s) => SPECIAL_WEAPON_SKINS.includes(s))) {
     ratio -= cfg.bonus_weapon;
   }
+  // 其他武器皮肤：每个 -0.1
+  const otherWeaponCount = weaponSkins.filter((s) => !SPECIAL_WEAPON_SKINS.includes(s)).length;
+  if (otherWeaponCount > 0) {
+    ratio -= otherWeaponCount * cfg.bonus_other_weapon_per1;
+  }
   const operatorRedSkins = p.operator_red_skins || [];
   if (operatorRedSkins.includes("凌霄戍卫")) {
     ratio -= cfg.bonus_lingxiao;
+  }
+  // 其他干员红皮：每个 -0.2
+  const OTHER_RED_SKINS = ["蚀金玫瑰", "水墨云图", "午夜邮差", "天际线", "维什戴尔"];
+  const otherRedCount = operatorRedSkins.filter((s) => OTHER_RED_SKINS.includes(s)).length;
+  if (otherRedCount > 0) {
+    ratio -= otherRedCount * cfg.bonus_other_red_per1;
+  }
+  // 干员金皮：每个 -0.3
+  const operatorGoldSkins = p.operator_gold_skins || [];
+  if (operatorGoldSkins.length > 0) {
+    ratio -= operatorGoldSkins.length * cfg.bonus_gold_per1;
   }
   const cards = parseInt(p.insurance_cards) || 0;
   if (cards > 0 && ins !== 9) {
@@ -80,7 +96,7 @@ function calcRentPrice(cfg, p) {
     }
     ratio -= cardBonus;
   }
-  if (ratio <= 0) ratio = 1;
+  if (ratio < 36) ratio = 36;
   return Math.round((hafuM * 100) / ratio);
 }
 
@@ -166,13 +182,19 @@ function analyzeRatio(cfg, p) {
   // 武器皮肤
   const weaponSkins = p.weapon_skins || [];
   if (weaponSkins.some((s) => SPECIAL_WEAPON_SKINS.includes(s))) {
-    changes.push(`🎯 特殊武器皮 <b style="color:#28a745">-${cfg.bonus_weapon}</b>`);
+    changes.push(`🎯 特殊武器皮(M7/AS-Val) <b style="color:#28a745">-${cfg.bonus_weapon}</b>`);
     totalChange -= cfg.bonus_weapon;
   } else {
     changes.push(`➖ 无特殊武器皮`);
     notes.push('无特殊武器皮');
   }
-  
+  const otherWeaponCount = weaponSkins.filter((s) => !SPECIAL_WEAPON_SKINS.includes(s)).length;
+  if (otherWeaponCount > 0) {
+    const otherWeaponBonus = otherWeaponCount * cfg.bonus_other_weapon_per1;
+    changes.push(`🎯 其他武器皮${otherWeaponCount}个 <b style="color:#28a745">-${otherWeaponBonus.toFixed(1)}</b>`);
+    totalChange -= otherWeaponBonus;
+  }
+
   // 干员红皮
   const operatorRedSkins = p.operator_red_skins || [];
   if (operatorRedSkins.includes("凌霄戍卫")) {
@@ -181,6 +203,21 @@ function analyzeRatio(cfg, p) {
   } else {
     changes.push(`➖ 无凌霄戍卫`);
     notes.push('无凌霄戍卫');
+  }
+  const OTHER_RED_SKINS = ["蚀金玫瑰", "水墨云图", "午夜邮差", "天际线", "维什戴尔"];
+  const otherRedCount = operatorRedSkins.filter((s) => OTHER_RED_SKINS.includes(s)).length;
+  if (otherRedCount > 0) {
+    const otherRedBonus = otherRedCount * cfg.bonus_other_red_per1;
+    changes.push(`👤 其他红皮${otherRedCount}个 <b style="color:#28a745">-${otherRedBonus.toFixed(1)}</b>`);
+    totalChange -= otherRedBonus;
+  }
+
+  // 干员金皮
+  const operatorGoldSkins = p.operator_gold_skins || [];
+  if (operatorGoldSkins.length > 0) {
+    const goldBonus = operatorGoldSkins.length * cfg.bonus_gold_per1;
+    changes.push(`⭐ 金皮${operatorGoldSkins.length}个 <b style="color:#28a745">-${goldBonus.toFixed(1)}</b>`);
+    totalChange -= goldBonus;
   }
   
   // 体验卡
@@ -211,8 +248,9 @@ function analyzeRatio(cfg, p) {
     notes.push('无体验卡');
   }
   
-  let finalRatio = baseRatio + totalChange;
-  if (finalRatio <= 0) finalRatio = 1;
+  const totalChangeRounded = Math.round(totalChange * 1000) / 1000;
+  let finalRatio = Math.round((baseRatio + totalChangeRounded) * 1000) / 1000;
+  if (finalRatio < 36) finalRatio = 36;
   
   const rentPrice = Math.round((hafuM * 100) / finalRatio);
   let summary = `<b style="font-size:15px;color:#007bff">${finalRatio}比例 = ${rentPrice}元</b>`;
@@ -220,8 +258,8 @@ function analyzeRatio(cfg, p) {
     summary += `<br><span style="color:#6c757d;font-size:12px">📝 ${notes.join('、')}</span>`;
   }
   summary += `<br><span style="color:#6c757d;font-size:11px">${insName}保险基础${baseRatio}`;
-  if (totalChange !== 0) {
-    summary += totalChange > 0 ? `+${totalChange}` : `${totalChange}`;
+  if (totalChangeRounded !== 0) {
+    summary += totalChangeRounded > 0 ? `+${totalChangeRounded}` : `${totalChangeRounded}`;
   }
   summary += ` = ${finalRatio}</span>`;
   

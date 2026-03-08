@@ -9,60 +9,28 @@
 <div class="container">
     <div class="header">
         <h2>🚀 数据录入</h2>
-        <div style="display: flex; gap: 10px;">
-            <button id="stopAutoBtn" onclick="toggleAutoClean()" style="padding: 10px 16px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.3s; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);">⏸️ 停止自动清除</button>
-            <button onclick="clearAllData()" style="padding: 10px 16px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.3s; box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);">🗑️ 一键清空</button>
-            <button id="settingsBtn" style="padding: 10px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.3s; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">⚙️ 设置</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:#666;">
+                <span>自动清空</span>
+                <div id="autoClearToggle" onclick="toggleAutoClear()" style="width:36px;height:20px;border-radius:10px;background:#ccc;position:relative;cursor:pointer;transition:background 0.2s;">
+                    <div id="autoClearKnob" style="width:16px;height:16px;border-radius:50%;background:white;position:absolute;top:2px;left:2px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+                </div>
+            </label>
+            <input type="number" id="autoClearSeconds" value="5" min="1" max="300" style="width:46px;padding:3px 5px;border:1px solid #ddd;border-radius:4px;font-size:12px;text-align:center;" title="自动清空延迟（秒）">
+            <span style="font-size:12px;color:#666;">秒</span>
         </div>
     </div>
     
-    <div id="settingsModal" style="display:none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <h3 style="margin-top: 0;">⚙️ 解析设置</h3>
-            <div style="margin-bottom: 15px;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" id="specifyDepositCheck" style="width: 18px; height: 18px; cursor: pointer;">
-                    <span>指定押金</span>
-                </label>
-                <input type="number" id="specifyDepositValue" placeholder="输入押金金额" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; margin-top: 5px; display: none;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" id="specifyPlayerRatioCheck" style="width: 18px; height: 18px; cursor: pointer;">
-                    <span>指定打手比例</span>
-                </label>
-                <input type="number" id="specifyPlayerRatioValue" placeholder="输入比例（如37）" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; margin-top: 5px; display: none;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" id="recoveryRentRatioCheck" style="width: 18px; height: 18px; cursor: pointer;">
-                    <span>回收租金比例</span>
-                </label>
-                <input type="number" id="recoveryRentRatioValue" placeholder="输入比例（如35）" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; margin-top: 5px; display: none;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" id="recoveryRentAmountCheck" style="width: 18px; height: 18px; cursor: pointer;">
-                    <span>回收租金金额</span>
-                </label>
-                <input type="number" id="recoveryRentAmountValue" placeholder="输入金额" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; margin-top: 5px; display: none;">
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="closeSettings()" style="flex: 1; padding: 8px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">关闭</button>
-                <button onclick="clearSettings()" style="flex: 1; padding: 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">清空设置</button>
-            </div>
-        </div>
-    </div>
     
     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
         <div class="tip" style="flex: 1; margin: 0;">💡 在此处 Ctrl+V 粘贴客户数据内容</div>
-        <button onclick="toggleHistory()" style="padding: 8px 16px; background: #17a2b8; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500;">📜 历史记录</button>
     </div>
     <textarea id="inputText" placeholder="粘贴内容..." autofocus></textarea>
     
-    <div class="btn-box">
-        <button class="main-btn" onclick="pasteToInput()">📋 粘贴</button>
-        <button class="main-btn" onclick="parseAndCopy()" style="margin-left: 10px;">解析数据</button>
+    <div class="btn-box" style="display: flex; gap: 10px;">
+        <button class="main-btn" onclick="clearAllData()" style="flex: 1; background: #ff6b6b;">🗑️ 清空</button>
+        <button class="main-btn" onclick="pasteToInput()" style="flex: 1;">📋 粘贴</button>
+        <button class="main-btn" onclick="parseAndCopy()" style="flex: 1; background: #28a745;">🚀 解析数据</button>
     </div>
     
     <div id="profitRateModule" style="display:none; margin-top: 12px; padding: 12px; background: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107;">
@@ -79,6 +47,10 @@
                 <span style="font-size: 12px; color: #666;">最终利润率</span>
                 <div style="font-size: 16px; font-weight: 600; color: #dc3545;" id="finalRateDisplay">-</div>
             </div>
+            <div>
+                <span style="font-size: 12px; color: #666;">打手比例</span>
+                <div style="font-size: 16px; font-weight: 600; color: #667eea;" id="playerRatioDisplay">-</div>
+            </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px; padding-top: 10px; border-top: 1px solid #ffe69c;">
             <span style="font-size: 12px; color: #666;">手动调整:</span>
@@ -92,16 +64,50 @@
 
     <div id="verifyMsg"></div>
     
-    <div id="historyModal" style="display:none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 600px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-height: 80vh; display: flex; flex-direction: column;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="margin: 0;">📜 数据录入历史</h3>
-                <button onclick="closeHistory()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
+
+    <div class="profit-settings">
+        <h3>⚙️ 解析设置</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 5px;">
+                    <input type="checkbox" id="specifyDepositCheck" style="width: 16px; height: 16px; cursor: pointer;">
+                    <span style="font-size: 13px;">指定押金</span>
+                </label>
+                <input type="number" id="specifyDepositValue" placeholder="押金金额" style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 13px; display: none;">
             </div>
-            <input type="text" id="historySearch" placeholder="搜索关键词（纯币、段位、皮肤等）..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; box-sizing: border-box;">
-            <div id="historyList" style="flex: 1; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; background: #f9f9f9;"></div>
-            <button onclick="clearHistory()" style="margin-top: 10px; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%;">清空历史记录</button>
+            <div>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 5px;">
+                    <input type="checkbox" id="zeroDepositCheck" style="width: 16px; height: 16px; cursor: pointer;">
+                    <span style="font-size: 13px;">押金归零</span>
+                </label>
+            </div>
+            <div>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 5px;">
+                    <input type="checkbox" id="specifyPlayerRatioCheck" style="width: 16px; height: 16px; cursor: pointer;">
+                    <span style="font-size: 13px;">指定打手比例</span>
+                </label>
+                <input type="number" id="specifyPlayerRatioValue" placeholder="比例（如37）" style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 13px; display: none;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 13px; margin-bottom: 5px;">打手比例调整</label>
+                <input type="number" id="playerRatioAdjust" placeholder="调整值（如+2）" style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 13px;">
+            </div>
+            <div>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 5px;">
+                    <input type="checkbox" id="recoveryRentRatioCheck" style="width: 16px; height: 16px; cursor: pointer;">
+                    <span style="font-size: 13px;">回收租金比例</span>
+                </label>
+                <input type="number" id="recoveryRentRatioValue" placeholder="比例（如35）" style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 13px; display: none;">
+            </div>
+            <div>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 5px;">
+                    <input type="checkbox" id="recoveryRentAmountCheck" style="width: 16px; height: 16px; cursor: pointer;">
+                    <span style="font-size: 13px;">回收租金金额</span>
+                </label>
+                <input type="number" id="recoveryRentAmountValue" placeholder="金额" style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 13px; display: none;">
+            </div>
         </div>
+        <button onclick="clearSettings()" style="padding: 6px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">清空设置</button>
     </div>
 
     <div class="profit-settings">
@@ -178,8 +184,36 @@ let inputModified = false;
 let lastParsedData = null;
 let lastVerifyData = null;
 let settingsTimer = null;
-let autoClearEnabled = true;
-let history = JSON.parse(localStorage.getItem('inputHistory')) || [];
+let autoClearEnabled = false;
+
+function toggleAutoClear() {
+    autoClearEnabled = !autoClearEnabled;
+    const toggle = document.getElementById('autoClearToggle');
+    const knob = document.getElementById('autoClearKnob');
+    toggle.style.background = autoClearEnabled ? '#667eea' : '#ccc';
+    knob.style.left = autoClearEnabled ? '18px' : '2px';
+}
+
+function getAutoClearDelay() {
+    return (parseInt(document.getElementById('autoClearSeconds').value) || 5) * 1000;
+}
+
+function scheduleAutoClear() {
+    if (!autoClearEnabled) return;
+    if (clearTimer) clearTimeout(clearTimer);
+    clearTimer = setTimeout(() => {
+        if (!inputModified && autoClearEnabled) {
+            document.getElementById('inputText').value = '';
+            document.getElementById('inputText').style.borderColor = '';
+            document.getElementById('inputText').style.backgroundColor = '';
+            document.getElementById('verifyMsg').style.display = 'none';
+            document.getElementById('profitRateModule').style.display = 'none';
+            document.getElementById('tableInput').value = '';
+            document.getElementById('convertPreview').textContent = '';
+            clearSettings();
+        }
+    }, getAutoClearDelay());
+}
 let parseSettings = {
     specifyDeposit: false,
     specifyDepositValue: 0,
@@ -188,43 +222,10 @@ let parseSettings = {
     recoveryRentRatio: false,
     recoveryRentRatioValue: 0,
     recoveryRentAmount: false,
-    recoveryRentAmountValue: 0
+    recoveryRentAmountValue: 0,
+    zeroDeposit: false,
+    playerRatioAdjust: 0
 };
-
-function toggleAutoClean() {
-    autoClearEnabled = !autoClearEnabled;
-    const btn = document.getElementById('stopAutoBtn');
-    if (autoClearEnabled) {
-        btn.textContent = '⏸️ 停止自动清除';
-        btn.style.background = '#28a745';
-        btn.style.boxShadow = '0 2px 8px rgba(40, 167, 69, 0.3)';
-    } else {
-        btn.textContent = '▶️ 恢复自动清除';
-        btn.style.background = '#ffc107';
-        btn.style.boxShadow = '0 2px 8px rgba(255, 193, 7, 0.3)';
-    }
-}
-
-function openSettings() {
-    if (clearTimer) clearTimeout(clearTimer);
-    document.getElementById('specifyDepositCheck').checked = parseSettings.specifyDeposit;
-    document.getElementById('specifyDepositValue').value = parseSettings.specifyDepositValue || '';
-    document.getElementById('specifyPlayerRatioCheck').checked = parseSettings.specifyPlayerRatio;
-    document.getElementById('specifyPlayerRatioValue').value = parseSettings.specifyPlayerRatioValue || '';
-    document.getElementById('recoveryRentRatioCheck').checked = parseSettings.recoveryRentRatio;
-    document.getElementById('recoveryRentRatioValue').value = parseSettings.recoveryRentRatioValue || '';
-    document.getElementById('recoveryRentAmountCheck').checked = parseSettings.recoveryRentAmount;
-    document.getElementById('recoveryRentAmountValue').value = parseSettings.recoveryRentAmountValue || '';
-    updateSettingsUI();
-    const modal = document.getElementById('settingsModal');
-    modal.style.display = 'flex';
-}
-
-function closeSettings() {
-    saveSettings();
-    document.getElementById('settingsModal').style.display = 'none';
-    resetSettingsAfterDelay();
-}
 
 function clearSettings() {
     document.getElementById('specifyDepositCheck').checked = false;
@@ -235,11 +236,14 @@ function clearSettings() {
     document.getElementById('recoveryRentRatioValue').value = '';
     document.getElementById('recoveryRentAmountCheck').checked = false;
     document.getElementById('recoveryRentAmountValue').value = '';
+    document.getElementById('zeroDepositCheck').checked = false;
+    document.getElementById('playerRatioAdjust').value = '';
     parseSettings = {
         specifyDeposit: false, specifyDepositValue: 0,
         specifyPlayerRatio: false, specifyPlayerRatioValue: 0,
         recoveryRentRatio: false, recoveryRentRatioValue: 0,
-        recoveryRentAmount: false, recoveryRentAmountValue: 0
+        recoveryRentAmount: false, recoveryRentAmountValue: 0,
+        zeroDeposit: false, playerRatioAdjust: 0
     };
     updateSettingsUI();
 }
@@ -253,6 +257,8 @@ function saveSettings() {
     parseSettings.recoveryRentRatioValue = parseFloat(document.getElementById('recoveryRentRatioValue').value) || 0;
     parseSettings.recoveryRentAmount = document.getElementById('recoveryRentAmountCheck').checked;
     parseSettings.recoveryRentAmountValue = parseFloat(document.getElementById('recoveryRentAmountValue').value) || 0;
+    parseSettings.zeroDeposit = document.getElementById('zeroDepositCheck').checked;
+    parseSettings.playerRatioAdjust = parseFloat(document.getElementById('playerRatioAdjust').value) || 0;
 }
 
 function updateSettingsUI() {
@@ -267,23 +273,8 @@ function clearAllData() {
     document.getElementById('verifyMsg').style.display = 'none';
     document.getElementById('profitRateModule').style.display = 'none';
     clearSettings();
-    closeSettings();
 }
 
-function resetSettingsAfterDelay() {
-    if (settingsTimer) clearTimeout(settingsTimer);
-    if (document.getElementById('settingsModal').style.display === 'flex') return;
-    settingsTimer = setTimeout(() => {
-        if (document.getElementById('settingsModal').style.display !== 'flex') {
-            clearSettings();
-        }
-    }, 5000);
-}
-
-document.getElementById('settingsBtn').addEventListener('click', openSettings);
-document.getElementById('settingsModal').addEventListener('click', function(e) {
-    if (e.target === this) closeSettings();
-});
 document.getElementById('specifyDepositCheck').addEventListener('change', updateSettingsUI);
 document.getElementById('specifyPlayerRatioCheck').addEventListener('change', updateSettingsUI);
 document.getElementById('recoveryRentRatioCheck').addEventListener('change', function() {
@@ -295,37 +286,73 @@ document.getElementById('recoveryRentAmountCheck').addEventListener('change', fu
     updateSettingsUI();
 });
 
+// 稀缺性加成：直接返回百分比值，范围 -1 ~ 5
+// 特殊规则：2/4格保险 + 体力负重均非满级(非7) + 无任何皮肤 → 允许 -1%
 function analyzeAccountValue(data) {
-     let rarity = 0;
-     const knifeSkins = data['刀皮'] ? data['刀皮'].split(/[、,，]/).filter(s => s && s !== '无') : [];
-     const redSkins = data['红皮'] ? data['红皮'].split(/[、,，]/).filter(s => s && s !== '无') : [];
-     
-     if (knifeSkins.length > 0) rarity += 0.8;
-     if (redSkins.length > 0) rarity += 0.6;
-     
-     const insurance = parseInt(data['保险']) || 0;
-     const stamina = parseInt(data['体力']) || 0;
-     const weight = parseInt(data['负重']) || 0;
-     const pureCoins = typeof data['纯币'] === 'number' ? data['纯币'] : (parseFloat(data['纯币']?.replace?.(/[mMb]/gi, '')) || 0);
-     
-     if (insurance === 9 && stamina === 7 && weight === 7) rarity += 2;
-     else if (insurance === 9 && (stamina === 7 || weight === 7)) rarity += 1;
-     else if (insurance === 6 && stamina >= 6 && weight >= 6) rarity -= 1;
-     
-     const hotKnifeSkins = ['赤枭', '怜悯', '北极星', '暗星'];
-     const hotRedSkins = ['凌霄戍卫'];
-     const hasHotKnife = knifeSkins.some(s => hotKnifeSkins.some(h => s.includes(h)));
-     const hasHotRed = redSkins.some(s => hotRedSkins.some(h => s.includes(h)));
-     
-     if ((hasHotKnife || hasHotRed) && insurance === 9 && stamina >= 6 && weight >= 6 && pureCoins >= 20 && pureCoins <= 200) {
-         rarity += 8;
-     }
-     
-     if (pureCoins > 200 && !hasHotKnife && !hasHotRed && insurance !== 9) {
-         rarity -= 2;
-     }
-     
-     return Math.max(Math.min(rarity, 10), 0);
+    let rarity = 0;
+
+    const insurance = parseInt(data['保险']) || 0;
+    const stamina = parseInt(data['体力']) || 0;
+    const weight = parseInt(data['负重']) || 0;
+
+    // 皮肤数据统一处理（支持数组或逗号分隔字符串）
+    const toArr = v => Array.isArray(v)
+        ? v.filter(s => s && s !== '无')
+        : (v ? String(v).split(/[、,，]/).map(s => s.trim()).filter(s => s && s !== '无') : []);
+
+    const knifeSkins   = toArr(data['刀皮']);
+    const redSkins     = toArr(data['红皮']);
+    const goldSkins    = toArr(data['金皮']);
+    const weaponSkins  = toArr(data['武器皮肤']);
+
+    const hasSkin = knifeSkins.length > 0 || redSkins.length > 0 || goldSkins.length > 0 || weaponSkins.length > 0;
+
+    // ── 特殊低质账号：2/4格 + 体力负重均非满级 + 无皮肤 → -1%
+    if ((insurance === 2 || insurance === 4) && stamina < 7 && weight < 7 && !hasSkin) {
+        return -1;
+    }
+
+    // ── 保险格数
+    if (insurance === 9) rarity += 1.0;
+    // 6格不加也不减，2/4格无额外影响
+
+    // ── 体力负重
+    if (stamina === 7 && weight === 7) rarity += 0.5;
+    else if (stamina >= 6 && weight >= 6) rarity += 0.2;
+
+    // ── 刀皮
+    const HOT_KNIFE = ['赤枭', '怜悯', '北极星', '暗星', '龙牙', '信条', '影锋'];
+    const hasHotKnife = knifeSkins.some(s => HOT_KNIFE.some(h => s.includes(h)));
+    const validKnifeCount = knifeSkins.filter(s => !['电锯惊魂', '处刑者'].includes(s)).length;
+    if (hasHotKnife) {
+        rarity += 1.0;
+    } else if (validKnifeCount >= 4) {
+        rarity += 0.8;
+    } else if (validKnifeCount >= 2) {
+        rarity += 0.5;
+    } else if (validKnifeCount === 1) {
+        rarity += 0.2;
+    }
+
+    // ── 干员红皮
+    const LINGXIAO = '凌霄戍卫';
+    const OTHER_RED = ['蚀金玫瑰', '水墨云图', '午夜邮差', '天际线', '维什戴尔'];
+    if (redSkins.some(s => s.includes(LINGXIAO))) rarity += 1.0;
+    const otherRedCount = redSkins.filter(s => OTHER_RED.some(r => s.includes(r))).length;
+    rarity += otherRedCount * 0.2;
+
+    // ── 干员金皮（每个 +0.3%，上限 1.5%）
+    rarity += Math.min(goldSkins.length * 0.3, 1.5);
+
+    // ── 特殊武器皮肤
+    const SPECIAL_WEAPON = ['M7棱镜攻势', 'AS-Val-巨浪', 'AS-Val巨浪'];
+    if (weaponSkins.some(s => SPECIAL_WEAPON.some(w => s.includes(w)))) rarity += 0.3;
+    // 其他武器皮肤（每个 +0.1%，上限 0.5%）
+    const otherWeaponCount = weaponSkins.filter(s => !SPECIAL_WEAPON.some(w => s.includes(w))).length;
+    rarity += Math.min(otherWeaponCount * 0.1, 0.5);
+
+    // clamp -1 ~ 5，保留1位小数
+    return Math.round(Math.max(-1, Math.min(5, rarity)) * 10) / 10;
 }
 
 async function pasteToInput() {
@@ -436,19 +463,29 @@ async function parseAndCopy() {
     
     lastParsedData = {
         data, PROFIT_CONFIG, recoveryRent, finalRate, baseRate, bonusRate, pureCoins,
-        finalIns, skinStr, login, timeStr, now
+        finalIns, skinStr, login, timeStr, now, rarityBonus
     };
     
-    resetSettingsAfterDelay();
-    performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr);
+    saveSettings();
+    performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus);
 }
 
-function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr) {
+function calcDisplayRatioAndRent(pureCoins, rawRent, rarityBonus) {
+     // rarityBonus 范围 -1~5，映射到 offset 0.1~0.7
+     const rarity = Math.max(-1, Math.min(5, rarityBonus || 0));
+     const offset = 0.1 + ((rarity + 1) / 6) * 0.6;
+     const rawRatio = pureCoins * 100 / rawRent;
+     const displayRatio = Math.round(rawRatio);
+     const playerRent = Math.ceil(pureCoins * 100 / (displayRatio - offset));
+     return { playerRatio: displayRatio, playerRent };
+}
+
+function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus) {
      let playerRatio, playerRent, ownerRatio, profit, deposit;
      
      if (parseSettings.specifyPlayerRatio && parseSettings.specifyPlayerRatioValue > 0) {
          playerRatio = parseSettings.specifyPlayerRatioValue;
-         playerRent = Math.ceil(pureCoins * 100 / playerRatio);
+         playerRent = Math.ceil(pureCoins * 100 / (playerRatio - (0.1 + ((Math.max(-1, Math.min(5, rarityBonus || 0)) + 1) / 6) * 0.6)));
          if (parseSettings.recoveryRentAmount && parseSettings.recoveryRentAmountValue > 0) {
              recoveryRent = parseSettings.recoveryRentAmountValue;
              ownerRatio = Math.floor(pureCoins * 100 / recoveryRent);
@@ -467,9 +504,9 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
              profit = PROFIT_CONFIG.minProfit;
              handlerRent = recoveryRent + profit;
          }
-         playerRent = handlerRent;
-         playerRatio = Math.ceil(pureCoins * 100 / playerRent);
-         playerRent = Math.ceil(pureCoins * 100 / (playerRatio - 0.9));
+         const r1 = calcDisplayRatioAndRent(pureCoins, handlerRent, rarityBonus);
+         playerRatio = r1.playerRatio;
+         playerRent = r1.playerRent;
          ownerRatio = Math.floor(pureCoins * 100 / recoveryRent);
      } else if (parseSettings.recoveryRentRatio && parseSettings.recoveryRentRatioValue > 0) {
          recoveryRent = Math.floor(pureCoins * 100 / parseSettings.recoveryRentRatioValue);
@@ -479,9 +516,9 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
              profit = PROFIT_CONFIG.minProfit;
              handlerRent = recoveryRent + profit;
          }
-         playerRent = handlerRent;
-         playerRatio = Math.ceil(pureCoins * 100 / playerRent);
-         playerRent = Math.ceil(pureCoins * 100 / (playerRatio - 0.9));
+         const r2 = calcDisplayRatioAndRent(pureCoins, handlerRent, rarityBonus);
+         playerRatio = r2.playerRatio;
+         playerRent = r2.playerRent;
          ownerRatio = parseSettings.recoveryRentRatioValue;
      } else {
          let handlerRent = Math.round(recoveryRent / (1 - finalRate));
@@ -490,21 +527,26 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
              profit = PROFIT_CONFIG.minProfit;
              handlerRent = recoveryRent + profit;
          }
-         playerRent = handlerRent;
-         playerRatio = Math.ceil(pureCoins * 100 / playerRent);
-         playerRent = Math.ceil(pureCoins * 100 / (playerRatio - 0.9));
+         const r3 = calcDisplayRatioAndRent(pureCoins, handlerRent, rarityBonus);
+         playerRatio = r3.playerRatio;
+         playerRent = r3.playerRent;
          ownerRatio = Math.floor(pureCoins * 100 / recoveryRent);
      }
-    
-    profit = playerRent - recoveryRent;
-    deposit = parseSettings.specifyDeposit ? parseSettings.specifyDepositValue : (parseFloat(data['押金']) || 80);
-    const totalAmount = playerRent + deposit;
+     
+     const offset = 0.1 + ((Math.max(-1, Math.min(5, rarityBonus || 0)) + 1) / 6) * 0.6;
+     profit = playerRent - recoveryRent;
+     deposit = parseSettings.zeroDeposit ? 0 : (parseSettings.specifyDeposit ? parseSettings.specifyDepositValue : (parseFloat(data['押金']) || 80));
+     if (parseSettings.playerRatioAdjust !== 0) {
+         playerRatio = playerRatio + parseSettings.playerRatioAdjust;
+         playerRent = Math.ceil(pureCoins * 100 / (playerRatio - offset));
+         profit = playerRent - recoveryRent;
+     }
+     const totalAmount = playerRent + deposit;
     
     const text = document.getElementById('inputText').value;
     const phoneMatch = text.match(/联系号码:\s*(\d+)[^\n]*?[（(]([^)）]+)[)）]/);
     const phone = phoneMatch ? phoneMatch[1] : (data['联系号码'] || '');
-    const onlineTime = (data['在线时间'] || (phoneMatch && phoneMatch[2] ? phoneMatch[2] : '')).replace(/[（()）]/g, '');
-    const contactInfo = `【${data['纯币'].replace(/M/g, 'm').replace(/b/gi, 'm')}】【${phone}】【${onlineTime}】`;
+    const contactInfo = phone;
     
     const rowArray = [
         data['纯币'].replace(/M/g, 'm').replace(/b/gi, 'm'),
@@ -534,35 +576,34 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
     navigator.clipboard.writeText(finalString);
     document.getElementById('status').style.display = 'block';
     setTimeout(() => { document.getElementById('status').style.display = 'none'; }, 3000);
+    const ratioEl = document.getElementById('playerRatioDisplay');
+    if (ratioEl) ratioEl.textContent = playerRatio;
     
     inputModified = false;
-    if (clearTimer) clearTimeout(clearTimer);
-    if (autoClearEnabled) {
-        clearTimer = setTimeout(() => {
-            if (!inputModified && document.getElementById('settingsModal').style.display !== 'flex' && autoClearEnabled) {
-                document.getElementById('inputText').value = '';
-                document.getElementById('verifyMsg').style.display = 'none';
-                document.getElementById('profitRateModule').style.display = 'none';
-                clearSettings();
-            }
-        }, 5000);
-    }
+    scheduleAutoClear();
 }
 
 async function regenerateWithCustomRate() {
     if (lastParsedData) {
         const customRate = parseFloat(document.getElementById('customProfitRate').value) / 100;
-        const { data, PROFIT_CONFIG, recoveryRent, pureCoins, finalIns, skinStr, login, timeStr } = lastParsedData;
-        performParse(customRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr);
+        const { data, PROFIT_CONFIG, recoveryRent, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus } = lastParsedData;
+        performParse(customRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus);
     } else if (lastVerifyData) {
         const customRate = parseFloat(document.getElementById('customProfitRate').value) / 100;
-        const { hafuCoin, customerPrice, insurance, stamina, weight, knifeSkins, operatorRedSkins } = lastVerifyData;
-        const ourPrice = calcRentPrice(CFG, lastVerifyData.params);
+        const { hafuCoin, customerPrice, rarityBonus: vRarity } = lastVerifyData;
         const handlerRent = Math.round(customerPrice / (1 - customRate));
         const profit = Math.max(handlerRent - customerPrice, 30);
-        const playerRent = customerPrice + profit;
-        const playerRatio = Math.ceil(hafuCoin * 100 / playerRent);
-        await navigator.clipboard.writeText([hafuCoin, '', '', '', '', '', '', '', '', '', '', '', playerRatio, playerRent, 80, playerRent + 80, Math.floor(hafuCoin * 100 / customerPrice), customerPrice, profit, new Date().toISOString().slice(0,16).replace('T', ' '), ''].join('\t'));
+        const rawRent = customerPrice + profit;
+        const rb = vRarity || 0;
+        const r = calcDisplayRatioAndRent(hafuCoin, rawRent, rb);
+        const offset = 0.1 + ((Math.max(-1, Math.min(5, rb)) + 1) / 6) * 0.6;
+        let playerRatio = r.playerRatio + parseSettings.playerRatioAdjust;
+        let playerRent = parseSettings.playerRatioAdjust !== 0
+            ? Math.ceil(hafuCoin * 100 / (playerRatio - offset))
+            : r.playerRent;
+        const finalProfit = playerRent - customerPrice;
+        const deposit = parseSettings.zeroDeposit ? 0 : 80;
+        await navigator.clipboard.writeText([hafuCoin, '', '', '', '', '', '', '', '', '', '', '', playerRatio, playerRent, deposit, playerRent + deposit, Math.floor(hafuCoin * 100 / customerPrice), customerPrice, finalProfit, new Date().toISOString().slice(0,16).replace('T', ' '), ''].join('\t'));
         document.getElementById('status').style.display = 'block';
         setTimeout(() => { document.getElementById('status').style.display = 'none'; }, 3000);
     }
@@ -581,7 +622,6 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
      setTimeout(() => {
          const text = document.getElementById('inputText').value;
          if (!text.trim()) return;
-         saveToHistory(text);
         
         const box = document.getElementById('verifyBox');
         const msgBox = document.getElementById('verifyMsg');
@@ -599,6 +639,7 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
            '体验卡': 'insuranceCards',
            '刀皮': 'knifeSkins',
            '干员红皮': 'operatorRedSkins',
+           '干员金皮': 'operatorGoldSkins',
            '武器皮肤': 'weaponSkins',
            'AWM子弹数量': 'awmBullets',
            '6头数量': 'helmet6',
@@ -636,7 +677,7 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
            
            if (key === 'customerPrice') {
               data[key] = parseFloat(value.replace(/[^\d.]/g, ''));
-           } else if (key === 'knifeSkins' || key === 'weaponSkins' || key === 'operatorRedSkins') {
+           } else if (key === 'knifeSkins' || key === 'weaponSkins' || key === 'operatorRedSkins' || key === 'operatorGoldSkins') {
               data[key] = value.split(/[、,，]/).map(s => s.trim()).filter(s => s && s !== '无');
            } else if (key === 'hafuCoin') {
               data[key] = parseFloat(value.replace(/[mM]/g, ''));
@@ -659,6 +700,7 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
         const armor6 = data.armor6 || 0;
         const knifeSkins = data.knifeSkins || [];
         const operatorRedSkins = data.operatorRedSkins || [];
+        const operatorGoldSkins = data.operatorGoldSkins || [];
         const weaponSkins = data.weaponSkins || [];
         const bullet6 = data.bullet6 || 0;
         const coffeeBeans = data.coffeeBeans || 0;
@@ -688,6 +730,7 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
            weight: weight,
            knife_skins: knifeSkins,
            operator_red_skins: operatorRedSkins,
+           operator_gold_skins: operatorGoldSkins,
            weapon_skins: weaponSkins,
            insurance_cards: insuranceCards
         };
@@ -710,8 +753,10 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
         }
         
         const rarityBonus = analyzeAccountValue({
-            '刀皮': data.knifeSkins ? data.knifeSkins.join(',') : '',
-            '红皮': data.operatorRedSkins ? data.operatorRedSkins.join(',') : '',
+            '刀皮': data.knifeSkins || [],
+            '红皮': data.operatorRedSkins || [],
+            '金皮': data.operatorGoldSkins || [],
+            '武器皮肤': data.weaponSkins || [],
             '保险': insurance,
             '体力': stamina,
             '负重': weight,
@@ -722,7 +767,7 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
         
         lastVerifyData = {
             hafuCoin, customerPrice, insurance, stamina, weight, knifeSkins, operatorRedSkins,
-            params
+            params, rarityBonus
         };
         
         document.getElementById('currentRateDisplay').textContent = baseRate.toFixed(2) + '%';
@@ -749,38 +794,14 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
            msgBox.innerHTML = `<b style="font-size: 14px; color: #28a745;">✅ 验证通过</b><br><span style="color: #666; font-size: 12px;">比例: <b style="color: #667eea;">${recoveryRatio}</b> | 额外消耗品价格: <b style="color: #667eea;">${consumablesValue.toFixed(2)}元</b>${detailsHtml}</span>`;
            msgBox.style.display = "block";
            inputModified = false;
-           if (clearTimer) clearTimeout(clearTimer);
-           if (autoClearEnabled) {
-               clearTimer = setTimeout(() => {
-                   if (!inputModified && document.getElementById('settingsModal').style.display !== 'flex' && autoClearEnabled) {
-                       document.getElementById('inputText').value = '';
-                       document.getElementById('inputText').style.borderColor = '';
-                       document.getElementById('inputText').style.backgroundColor = '';
-                       document.getElementById('verifyMsg').style.display = 'none';
-                       document.getElementById('profitRateModule').style.display = 'none';
-                       clearSettings();
-                   }
-               }, 5000);
-           }
+           scheduleAutoClear();
         } else {
            document.getElementById('inputText').style.borderColor = '#dc3545';
            document.getElementById('inputText').style.backgroundColor = '#ffe6e6';
            msgBox.innerHTML = `<b style="font-size: 14px; color: #dc3545;">⚠️ 价格不对</b><br><span style="color: #666; font-size: 12px;">客户: <b style="color: #667eea;">${customerPrice}元</b> | 系统: <b style="color: #667eea;">${ourPrice}元</b> | 差异: <b style="color: #dc3545;">${priceDiff.toFixed(1)}元</b><br>比例: <b style="color: #667eea;">${recoveryRatio}</b> | 额外消耗品价格: <b style="color: #667eea;">${consumablesValue.toFixed(2)}元</b>${detailsHtml}</span>`;
            msgBox.style.display = "block";
            inputModified = false;
-           if (clearTimer) clearTimeout(clearTimer);
-           if (autoClearEnabled) {
-               clearTimer = setTimeout(() => {
-                   if (!inputModified && document.getElementById('settingsModal').style.display !== 'flex' && autoClearEnabled) {
-                       document.getElementById('inputText').value = '';
-                       document.getElementById('inputText').style.borderColor = '';
-                       document.getElementById('inputText').style.backgroundColor = '';
-                       document.getElementById('verifyMsg').style.display = 'none';
-                       document.getElementById('profitRateModule').style.display = 'none';
-                       clearSettings();
-                   }
-               }, 5000);
-           }
+           scheduleAutoClear();
         }
     }, 0);
 });
@@ -795,7 +816,7 @@ async function convertTableToStandard() {
      }
      
      const fields = text.split('\t');
-     if (fields.length < 22) {
+     if (fields.length < 21) {
          alert("数据格式不正确！请确保粘贴完整的表格行数据。");
          return;
      }
@@ -813,24 +834,14 @@ async function convertTableToStandard() {
      const descRaw = fields[13] || '';
      const loginMethod = fields[14] || '';
      const playerRatio = fields[15] || '';
-     const playerRent = parseFloat(fields[16]) || 0;
      const deposit = parseFloat(fields[17]) || 80;
      const recoveryRent = parseFloat(fields[20]) || 0;
-     const contactInfo = fields[21] || '';
+     const phone = fields[21] || '';
+     const onlineTime = fields[22] || '';
      
-     const bullet6 = parseFloat(descRaw.match(/(\d+)组/)?.[1]) || 0;
-     const coffeeBeans = parseFloat(descRaw.match(/咖啡豆[:\s]*(\d+)/)?.[1]) || 0;
-     const fullGearPack = parseFloat(descRaw.match(/全装包[:\s]*(\d+)/)?.[1]) || 0;
-     const turtleBag = parseFloat(descRaw.match(/45格乌龟包[:\s]*(\d+)/)?.[1]) || 0;
-     const consumablesValue = (awm * 0.8 + head6 * 1 + armor6 * 2 + bullet6 * 10 + coffeeBeans * 3 + fullGearPack * 3 + turtleBag * 2).toFixed(2);
      
      const insuranceMatch = insuranceRaw.match(/^(\d+)/);
      const insurance = insuranceMatch ? insuranceMatch[1] : insuranceRaw;
-     
-     const phoneMatch = contactInfo.match(/【(\d+)】/);
-     const phone = phoneMatch ? phoneMatch[1] : '';
-     const onlineTimeMatch = contactInfo.match(/】【([^】]+)】/);
-     const onlineTime = onlineTimeMatch ? onlineTimeMatch[1] : '';
      
      let knifeSkin = '无', redSkin = '无', goldSkin = '无', weaponSkin = '无';
      if (descRaw && descRaw !== '无') {
@@ -850,6 +861,12 @@ async function convertTableToStandard() {
          });
      }
      
+     const bullet6 = parseFloat(descRaw.match(/(\d+)组/)?.[1]) || 0;
+     const coffeeBeans = parseFloat(descRaw.match(/咖啡豆[:\s]*(\d+)/)?.[1]) || 0;
+     const fullGearPack = parseFloat(descRaw.match(/全装包[:\s]*(\d+)/)?.[1]) || 0;
+     const turtleBag = parseFloat(descRaw.match(/45格乌龟包[:\s]*(\d+)/)?.[1]) || 0;
+     const consumablesValue = (awm * 0.8 + head6 * 1 + armor6 * 2 + bullet6 * 10 + coffeeBeans * 3 + fullGearPack * 3 + turtleBag * 2).toFixed(2);
+     
      let loginText = 'VX扫码';
      if (loginMethod.includes('qq扫码')) loginText = 'QQ扫码';
      else if (loginMethod.includes('qq账密')) loginText = 'QQ账号密码';
@@ -861,6 +878,7 @@ async function convertTableToStandard() {
 哈夫币纯币: ${hafuCoin.toUpperCase()}
 等级: ${level}
 保险格数: ${insurance}格
+打手比例: ${playerRatio}
 体力: ${stamina}
 负重: ${weight}
 AWM子弹数量: ${awm}
@@ -969,52 +987,6 @@ async function convertTableToSimple() {
     }
 }
 
-function saveToHistory(text) {
-    const entry = {
-        time: new Date().toLocaleString('zh-CN'),
-        content: text.substring(0, 200)
-    };
-    history.unshift(entry);
-    if (history.length > 50) history.pop();
-    localStorage.setItem('inputHistory', JSON.stringify(history));
-}
-
-function toggleHistory() {
-    document.getElementById('historyModal').style.display = document.getElementById('historyModal').style.display === 'none' ? 'flex' : 'none';
-    renderHistory(history);
-}
-
-function closeHistory() {
-    document.getElementById('historyModal').style.display = 'none';
-}
-
-function renderHistory(items) {
-    const list = document.getElementById('historyList');
-    list.innerHTML = items.length === 0 ? '<div style="text-align: center; color: #999; padding: 20px;">暂无历史记录</div>' :
-        items.map((item, idx) => `<div style="padding: 10px; border-bottom: 1px solid #ddd; cursor: pointer; hover: background: #f0f0f0;" onclick="loadHistory(${idx})">
-            <div style="font-size: 12px; color: #999;">${item.time}</div>
-            <div style="font-size: 13px; color: #333; margin-top: 5px;">${item.content}...</div>
-        </div>`).join('');
-}
-
-function loadHistory(idx) {
-    document.getElementById('inputText').value = history[idx].content;
-    closeHistory();
-}
-
-function clearHistory() {
-    if (confirm('确定要清空所有历史记录吗？')) {
-        history = [];
-        localStorage.removeItem('inputHistory');
-        renderHistory([]);
-    }
-}
-
-document.getElementById('historySearch').addEventListener('input', function() {
-    const keyword = this.value.toLowerCase();
-    const filtered = history.filter(item => item.content.toLowerCase().includes(keyword));
-    renderHistory(filtered);
-});
 </script>
 </body>
 </html>

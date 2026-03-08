@@ -25,8 +25,17 @@ const CFG = {
   // 【特殊武器皮肤】M7棱镜攻势 或 AS-Val巨浪
   bonus_weapon: 1,
 
+  // 【其他武器皮肤】每个 -0.1
+  bonus_other_weapon_per1: 0.1,
+
   // 【特殊干员红皮】凌霄戍卫
   bonus_lingxiao: 2,
+
+  // 【其他干员红皮】蚀金玫瑰/水墨云图/午夜邮差/天际线/维什戴尔，每个 -0.2
+  bonus_other_red_per1: 0.2,
+
+  // 【干员金皮】每个 -0.3
+  bonus_gold_per1: 0.3,
 
   // 【哈夫币惩罚】大额降价，促进租赁
   bonus_hafu_201to300: 1,   // 201-300M
