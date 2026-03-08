@@ -548,6 +548,9 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
     const phone = phoneMatch ? phoneMatch[1] : (data['联系号码'] || '');
     const contactInfo = phone;
     
+    const onlineTime = data['在线时间'] ? data['在线时间'].trim() : '';
+    const timeWithOnline = onlineTime ? `${timeStr}\n${onlineTime}` : timeStr;
+
     const rowArray = [
         data['纯币'].replace(/M/g, 'm').replace(/b/gi, 'm'),
         data['段位'],
@@ -568,11 +571,14 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
         ownerRatio,
         recoveryRent,
         profit,
-        timeStr,
+        timeWithOnline,
         contactInfo
     ];
 
-    const finalString = rowArray.join('\t');
+    const finalString = rowArray.map(v => {
+        const s = String(v ?? '');
+        return s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+    }).join('\t');
     navigator.clipboard.writeText(finalString);
     document.getElementById('status').style.display = 'block';
     setTimeout(() => { document.getElementById('status').style.display = 'none'; }, 3000);
