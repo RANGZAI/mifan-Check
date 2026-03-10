@@ -567,6 +567,14 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
          playerRent = Math.ceil(pureCoins * 100 / (playerRatio - offset));
          profit = playerRent - recoveryRent;
      }
+     
+     // 最终检查：确保利润不低于最低利润
+     if (profit < PROFIT_CONFIG.minProfit) {
+         profit = PROFIT_CONFIG.minProfit;
+         playerRent = recoveryRent + profit;
+         // 重新计算打手比例
+         playerRatio = Math.round(pureCoins * 100 / playerRent);
+     }
      const totalAmount = playerRent + deposit;
     
     const text = document.getElementById('inputText').value;
