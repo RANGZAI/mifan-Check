@@ -34,6 +34,9 @@
     </div>
     
     <div id="profitRateModule" style="display:none; margin-top: 12px; padding: 12px; background: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107;">
+        <div id="cardCoverTip" style="display:none; margin-bottom: 10px; padding: 6px 10px; background: #d4edda; border-radius: 4px; border-left: 3px solid #28a745; font-size: 12px; color: #155724;">
+            🎫 体验卡可覆盖租期，打手比例已按9格标准计算（利润更高）
+        </div>
         <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 10px;">
             <div>
                 <span style="font-size: 12px; color: #666;">当前利润率档位</span>
@@ -424,11 +427,19 @@ async function parseAndCopy() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const timeStr = `${year}-${month}-${date} ${hours}:${minutes}`;
 
+    const pureCoins = parseFloat(data['纯币'].replace(/[Mmb]/gi, '')) || 0;
+    const recoveryRent = parseFloat(data['租金']) || 1;
+
     let finalIns = data['保险'] || "";
     const cardCount = parseInt(data['体验卡']) || 0;
     if (cardCount > 0) {
         finalIns = `${finalIns} (9格体验卡${cardCount}天)`;
     }
+
+    // 判断体验卡是否覆盖租期（租期 = ceil(纯币m / 10) 天，即1000w/天）
+    const rentDays = Math.ceil(pureCoins / 10);
+    const insuranceVal = parseInt(data['保险']) || 2;
+    const cardCoversRent = (insuranceVal !== 9) && (cardCount >= rentDays);
 
     const skinList = [data['刀皮'], data['红皮'], data['金皮'], data['武器皮肤']].filter(s => s && s !== '无');
     let skinStr = skinList.join(' / ') || '无';
@@ -438,9 +449,6 @@ async function parseAndCopy() {
     if (loginMethod.includes('QQ扫码')) login = 'qq扫码';
     else if (loginMethod.includes('QQ账号密码')) login = 'qq账密';
     else if (loginMethod.includes('VX扫码')) login = 'vx扫码';
-
-    const pureCoins = parseFloat(data['纯币'].replace(/[Mmb]/gi, '')) || 0;
-    const recoveryRent = parseFloat(data['租金']) || 1;
     
     let targetProfitRate = PROFIT_CONFIG.tinyRate;
     if (pureCoins > 500) {
@@ -463,11 +471,11 @@ async function parseAndCopy() {
     
     lastParsedData = {
         data, PROFIT_CONFIG, recoveryRent, finalRate, baseRate, bonusRate, pureCoins,
-        finalIns, skinStr, login, timeStr, now, rarityBonus
+        finalIns, skinStr, login, timeStr, now, rarityBonus, cardCoversRent
     };
     
     saveSettings();
-    performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus);
+    performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent);
 }
 
 function calcDisplayRatioAndRent(pureCoins, rawRent, rarityBonus) {
@@ -480,8 +488,20 @@ function calcDisplayRatioAndRent(pureCoins, rawRent, rarityBonus) {
      return { playerRatio: displayRatio, playerRent };
 }
 
-function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus) {
+function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent) {
      let playerRatio, playerRent, ownerRatio, profit, deposit;
+
+     // 体验卡覆盖租期时，打手比例按9格标准计算
+     // 原理：9格账号的打手比例基础是 base9=41，非9格是 base6=45 或 base24=49
+     // calcDisplayRatioAndRent 根据 handlerRent 反推打手比例
+     // 覆盖时，直接用 base9 对应的租金作为 handlerRent，让打手比例落在9格水平
+     // 回收比例/回收金额不变，利润 = playerRent - recoveryRent 自然更高
+     function calcHandlerRentWithCardCover() {
+         if (!cardCoversRent) return null;
+         // 直接用9格基础比例对应的租金作为打手侧 handlerRent
+         // 这样 calcDisplayRatioAndRent 会算出接近 base9(41) 的打手比例
+         return Math.ceil(pureCoins * 100 / CFG.base9);
+     }
      
      if (parseSettings.specifyPlayerRatio && parseSettings.specifyPlayerRatioValue > 0) {
          playerRatio = parseSettings.specifyPlayerRatioValue;
@@ -504,6 +524,8 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
              profit = PROFIT_CONFIG.minProfit;
              handlerRent = recoveryRent + profit;
          }
+         const coveredRent = calcHandlerRentWithCardCover();
+         if (coveredRent !== null) handlerRent = coveredRent;
          const r1 = calcDisplayRatioAndRent(pureCoins, handlerRent, rarityBonus);
          playerRatio = r1.playerRatio;
          playerRent = r1.playerRent;
@@ -516,6 +538,8 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
              profit = PROFIT_CONFIG.minProfit;
              handlerRent = recoveryRent + profit;
          }
+         const coveredRent2 = calcHandlerRentWithCardCover();
+         if (coveredRent2 !== null) handlerRent = coveredRent2;
          const r2 = calcDisplayRatioAndRent(pureCoins, handlerRent, rarityBonus);
          playerRatio = r2.playerRatio;
          playerRent = r2.playerRent;
@@ -527,6 +551,8 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
              profit = PROFIT_CONFIG.minProfit;
              handlerRent = recoveryRent + profit;
          }
+         const coveredRent3 = calcHandlerRentWithCardCover();
+         if (coveredRent3 !== null) handlerRent = coveredRent3;
          const r3 = calcDisplayRatioAndRent(pureCoins, handlerRent, rarityBonus);
          playerRatio = r3.playerRatio;
          playerRent = r3.playerRent;
@@ -584,6 +610,8 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
     setTimeout(() => { document.getElementById('status').style.display = 'none'; }, 3000);
     const ratioEl = document.getElementById('playerRatioDisplay');
     if (ratioEl) ratioEl.textContent = playerRatio;
+    const cardTip = document.getElementById('cardCoverTip');
+    if (cardTip) cardTip.style.display = cardCoversRent ? 'block' : 'none';
     
     inputModified = false;
     scheduleAutoClear();
@@ -592,8 +620,8 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
 async function regenerateWithCustomRate() {
     if (lastParsedData) {
         const customRate = parseFloat(document.getElementById('customProfitRate').value) / 100;
-        const { data, PROFIT_CONFIG, recoveryRent, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus } = lastParsedData;
-        performParse(customRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus);
+        const { data, PROFIT_CONFIG, recoveryRent, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent } = lastParsedData;
+        performParse(customRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent);
     } else if (lastVerifyData) {
         const customRate = parseFloat(document.getElementById('customProfitRate').value) / 100;
         const { hafuCoin, customerPrice, rarityBonus: vRarity } = lastVerifyData;
@@ -821,29 +849,74 @@ async function convertTableToStandard() {
          return;
      }
      
-     const fields = text.split('\t');
+     // 处理多行数据：合并所有行的Tab分隔字段
+     const lines = text.split('\n').filter(l => l.trim());
+     let allFields = [];
+     lines.forEach(line => {
+         const lineFields = line.split('\t');
+         allFields = allFields.concat(lineFields);
+     });
+     
+     const fields = allFields;
      if (fields.length < 21) {
          alert("数据格式不正确！请确保粘贴完整的表格行数据。");
          return;
      }
      
-     const hafuCoin = fields[3] || '';
-     const rank = fields[4] || '';
-     const kd = parseFloat(fields[5]) || 0;
-     const level = parseFloat(fields[6]) || 0;
-     const insuranceRaw = fields[7] || '';
-     const stamina = parseFloat(fields[8]) || 0;
-     const weight = parseFloat(fields[9]) || 0;
-     const awm = parseFloat(fields[10]) || 0;
-     const head6 = parseFloat(fields[11]) || 0;
-     const armor6 = parseFloat(fields[12]) || 0;
-     const descRaw = fields[13] || '';
-     const loginMethod = fields[14] || '';
-     const playerRatio = fields[15] || '';
-     const deposit = parseFloat(fields[17]) || 80;
-     const recoveryRent = parseFloat(fields[20]) || 0;
-     const phone = fields[21] || '';
-     const onlineTime = fields[22] || '';
+     // 正确的字段索引（根据表头：账号编号、哈弗币、段位、绝密kd、等级、保险、体力、负重、aw、六头、六甲、红皮/刀皮、登录、比例、租金、押金、总金额、回收比例、回收租金、利润、上架日期、电话）
+     const accountNum = fields[0] || '';
+     const hafuCoin = fields[1] || '';
+     const rank = fields[2] || '';
+     const kd = parseFloat(fields[3]) || 0;
+     const level = parseFloat(fields[4]) || 0;
+     const insuranceRaw = fields[5] || '';
+     const stamina = parseFloat(fields[6]) || 0;
+     const weight = parseFloat(fields[7]) || 0;
+     const awm = parseFloat(fields[8]) || 0;
+     const head6 = parseFloat(fields[9]) || 0;
+     const armor6 = parseFloat(fields[10]) || 0;
+     const descRaw = fields[11] || '';
+     const loginMethod = fields[12] || '';
+     const playerRatio = fields[13] || '';
+     const playerRent = parseFloat(fields[14]) || 0;
+     const deposit = parseFloat(fields[15]) || 80;
+     const totalAmount = parseFloat(fields[16]) || 0;
+     const recoveryRatio = fields[17] || '';
+     const recoveryRent = parseFloat(fields[18]) || 0;
+     const profit = parseFloat(fields[19]) || 0;
+     const uploadDate = fields[20] || '';
+     
+     // 电话号码识别：优先从合并后的字段中查找11位手机号
+     let phone = '';
+     // 先检查第21个字段（电话列）
+     if (fields[21]) {
+         const phoneMatch = fields[21].match(/1[3-9]\d{9}/);
+         if (phoneMatch) {
+             phone = phoneMatch[0];
+         }
+     }
+     // 如果没找到，从后续字段中查找
+     if (!phone) {
+         for (let i = 22; i < fields.length; i++) {
+             const field = fields[i].trim();
+             const phoneMatch = field.match(/1[3-9]\d{9}/);
+             if (phoneMatch) {
+                 phone = phoneMatch[0];
+                 break;
+             }
+         }
+     }
+     
+     // 在线时间：查找日期时间格式的字段（排除上架日期）
+     let onlineTime = '';
+     for (let i = 21; i < fields.length; i++) {
+         const field = fields[i].trim();
+         // 匹配日期时间格式，但排除已识别为电话的字段
+         if (field.match(/^\d{4}-\d{2}-\d{2}/) && field !== uploadDate) {
+             onlineTime = field;
+             break;
+         }
+     }
      
      
      const insuranceMatch = insuranceRaw.match(/^(\d+)/);
@@ -957,20 +1030,29 @@ async function convertTableToSimple() {
          return;
      }
      
-     const fields = text.split('\t');
-     if (fields.length < 28) {
+     // 处理多行数据：合并所有行的Tab分隔字段
+     const lines = text.split('\n').filter(l => l.trim());
+     let allFields = [];
+     lines.forEach(line => {
+         const lineFields = line.split('\t');
+         allFields = allFields.concat(lineFields);
+     });
+     
+     const fields = allFields;
+     if (fields.length < 21) {
          alert("数据格式不正确！请确保粘贴完整的表格行数据。");
          return;
      }
      
-     const accountNum = fields[27] || '';
-     const hafuCoin = fields[3] || '';
-     const insuranceRaw = fields[7] || '';
-     const stamina = parseFloat(fields[8]) || 0;
-     const weight = parseFloat(fields[9]) || 0;
-     const playerRatio = fields[15] || '';
-     const playerRent = parseFloat(fields[16]) || 0;
-     const descRaw = fields[13] || '';
+     // 正确的字段索引（根据表头：账号编号、哈弗币、段位、绝密kd、等级、保险、体力、负重、aw、六头、六甲、红皮/刀皮、登录、比例、租金、押金、总金额、回收比例、回收租金、利润、上架日期、电话）
+     const accountNum = fields[0] || '';
+     const hafuCoin = fields[1] || '';
+     const insuranceRaw = fields[5] || '';
+     const stamina = parseFloat(fields[6]) || 0;
+     const weight = parseFloat(fields[7]) || 0;
+     const playerRatio = fields[13] || '';
+     const playerRent = parseFloat(fields[14]) || 0;
+     const descRaw = fields[11] || '';
      
      const insuranceMatch = insuranceRaw.match(/^(\d+)/);
      const insurance = insuranceMatch ? insuranceMatch[1] : insuranceRaw;
