@@ -324,10 +324,13 @@ function analyzeAccountValue(data) {
     else if (stamina >= 6 && weight >= 6) rarity += 0.2;
 
     // ── 刀皮
-    const HOT_KNIFE = ['赤枭', '怜悯', '北极星', '暗星', '龙牙', '信条', '影锋'];
+    const HOT_KNIFE = ['怜悯', '北极星', '暗星', '龙牙', '信条', '影锋'];
+    const hasChixiao = knifeSkins.some(s => s.includes('赤枭'));
     const hasHotKnife = knifeSkins.some(s => HOT_KNIFE.some(h => s.includes(h)));
     const validKnifeCount = knifeSkins.filter(s => !['电锯惊魂', '处刑者'].includes(s)).length;
-    if (hasHotKnife) {
+    if (hasChixiao) {
+        rarity += 3.0;
+    } else if (hasHotKnife) {
         rarity += 1.0;
     } else if (validKnifeCount >= 4) {
         rarity += 0.8;
