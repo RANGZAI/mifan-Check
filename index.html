@@ -10,6 +10,7 @@
     <div class="header">
         <h2>🚀 数据录入</h2>
         <div style="display:flex;align-items:center;gap:8px;">
+            <button onclick="toggleAdvanced()" id="advancedToggleBtn" style="padding:4px 10px;font-size:12px;background:#667eea;color:white;border:none;border-radius:4px;cursor:pointer;">⚙️ 高级设置</button>
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:#666;">
                 <span>自动清空</span>
                 <div id="autoClearToggle" onclick="toggleAutoClear()" style="width:36px;height:20px;border-radius:10px;background:#ccc;position:relative;cursor:pointer;transition:background 0.2s;">
@@ -33,7 +34,13 @@
         <button class="main-btn" onclick="parseAndCopy()" style="flex: 1; background: #28a745;">🚀 解析数据</button>
     </div>
     
-    <div id="profitRateModule" style="display:none; margin-top: 12px; padding: 12px; background: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107;">
+    <div id="status" style="display:none;">✅ 复制成功！数据已对齐，请去 Excel C 列粘贴。</div>
+
+    <div id="verifyMsg"></div>
+
+    <div id="advancedPanel" style="display:none;">
+
+    <div id="profitRateModule" style="margin-top: 12px; padding: 12px; background: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107;">
         <div id="cardCoverTip" style="display:none; margin-bottom: 10px; padding: 6px 10px; background: #d4edda; border-radius: 4px; border-left: 3px solid #28a745; font-size: 12px; color: #155724;">
             🎫 体验卡可覆盖租期，打手比例已按9格标准计算（利润更高）
         </div>
@@ -62,11 +69,6 @@
             <button class="main-btn" onclick="regenerateWithCustomRate()" style="padding: 6px 16px; font-size: 12px; margin: 0;">重新解析</button>
         </div>
     </div>
-
-    <div id="status">✅ 复制成功！数据已对齐，请去 Excel C 列粘贴。</div>
-
-    <div id="verifyMsg"></div>
-    
 
     <div class="profit-settings">
         <h3>⚙️ 解析设置</h3>
@@ -177,6 +179,8 @@
             <pre id="convertPreview" style="background: #f8f9fa; padding: 12px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; font-size: 13px; line-height: 1.6;"></pre>
         </div>
     </div>
+
+    </div><!-- /advancedPanel -->
 </div>
 
 <script src="price-config.js"></script>
@@ -197,6 +201,13 @@ function toggleAutoClear() {
     knob.style.left = autoClearEnabled ? '18px' : '2px';
 }
 
+let advancedOpen = false;
+function toggleAdvanced() {
+    advancedOpen = !advancedOpen;
+    document.getElementById('advancedPanel').style.display = advancedOpen ? 'block' : 'none';
+    document.getElementById('advancedToggleBtn').textContent = advancedOpen ? '⚙️ 收起设置' : '⚙️ 高级设置';
+}
+
 function getAutoClearDelay() {
     return (parseInt(document.getElementById('autoClearSeconds').value) || 5) * 1000;
 }
@@ -210,7 +221,9 @@ function scheduleAutoClear() {
             document.getElementById('inputText').style.borderColor = '';
             document.getElementById('inputText').style.backgroundColor = '';
             document.getElementById('verifyMsg').style.display = 'none';
-            document.getElementById('profitRateModule').style.display = 'none';
+            document.getElementById('advancedPanel').style.display = 'none';
+            advancedOpen = false;
+            document.getElementById('advancedToggleBtn').textContent = '⚙️ 高级设置';
             document.getElementById('tableInput').value = '';
             document.getElementById('convertPreview').textContent = '';
             clearSettings();
@@ -274,7 +287,6 @@ function updateSettingsUI() {
 function clearAllData() {
     document.getElementById('inputText').value = '';
     document.getElementById('verifyMsg').style.display = 'none';
-    document.getElementById('profitRateModule').style.display = 'none';
     clearSettings();
 }
 
@@ -605,10 +617,10 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
         playerRent,
         deposit,
         totalAmount,
+        timeWithOnline,
         ownerRatio,
         recoveryRent,
         profit,
-        timeWithOnline,
         contactInfo
     ];
 
@@ -618,7 +630,6 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
     }).join('\t');
     navigator.clipboard.writeText(finalString);
     document.getElementById('status').style.display = 'block';
-    setTimeout(() => { document.getElementById('status').style.display = 'none'; }, 3000);
     const ratioEl = document.getElementById('playerRatioDisplay');
     if (ratioEl) ratioEl.textContent = playerRatio;
     const cardTip = document.getElementById('cardCoverTip');
@@ -650,7 +661,6 @@ async function regenerateWithCustomRate() {
         const deposit = parseSettings.zeroDeposit ? 0 : 80;
         await navigator.clipboard.writeText([hafuCoin, '', '', '', '', '', '', '', '', '', '', '', playerRatio, playerRent, deposit, playerRent + deposit, Math.floor(hafuCoin * 100 / customerPrice), customerPrice, finalProfit, new Date().toISOString().slice(0,16).replace('T', ' '), ''].join('\t'));
         document.getElementById('status').style.display = 'block';
-        setTimeout(() => { document.getElementById('status').style.display = 'none'; }, 3000);
     }
 }
 
@@ -819,7 +829,6 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
         document.getElementById('rarityBonusDisplay').textContent = rarityBonus.toFixed(2) + '%';
         document.getElementById('finalRateDisplay').textContent = finalRate.toFixed(2) + '%';
         document.getElementById('customProfitRate').value = finalRate.toFixed(2);
-        document.getElementById('profitRateModule').style.display = 'block';
         
         const detailsHtml = `<div style="margin-top:10px;padding:12px;background:#f8f9fa;border-radius:6px;font-size:12px;text-align:left;line-height:1.8;border-left:3px solid #007bff;">
           <div style="margin-bottom:8px;font-weight:600;color:#333;">${analysis.summary}</div>
@@ -1062,6 +1071,7 @@ async function convertTableToSimple() {
      const weight = parseFloat(fields[7]) || 0;
      const playerRatio = fields[13] || '';
      const playerRent = parseFloat(fields[14]) || 0;
+     const playerDeposit = parseFloat(fields[15]) || 0;
      const descRaw = fields[11] || '';
      
      const insuranceMatch = insuranceRaw.match(/^(\d+)/);
@@ -1069,7 +1079,7 @@ async function convertTableToSimple() {
      const coinNum = hafuCoin.replace(/[mM]/gi, '');
      
      let skinText = descRaw === '无' ? '无皮肤' : descRaw;
-     const simpleFormat = `编号【${accountNum}】，${coinNum}m纯币${playerRatio}比例出，租金${playerRent}，${insurance}格保险-${stamina}体${weight}负，${skinText}`;
+     const simpleFormat = `编号【${accountNum}】，${coinNum}m纯币${playerRatio}比例出，租金${playerRent}押金${playerDeposit}，${insurance}格保险-${stamina}体${weight}负，${skinText}`;
     
     document.getElementById('convertPreview').textContent = simpleFormat;
     
