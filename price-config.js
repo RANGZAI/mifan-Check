@@ -23,7 +23,7 @@ const CFG = {
   bonus_all_knife: 3,     // 集齐全部10把
 
   // 【特殊武器皮肤】M7棱镜攻势 或 AS-Val巨浪
-  bonus_weapon: 1,
+  bonus_weapon: 3,
 
   // 【其他武器皮肤】每个 -0.1
   bonus_other_weapon_per1: 0.1,

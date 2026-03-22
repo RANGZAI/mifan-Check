@@ -10,6 +10,7 @@
     <div class="header">
         <h2>🚀 数据录入</h2>
         <div style="display:flex;align-items:center;gap:8px;">
+            <button onclick="toggleSpecial()" id="specialToggleBtn" style="padding:4px 10px;font-size:12px;background:#ff6b6b;color:white;border:none;border-radius:4px;cursor:pointer;">🔧 特殊情况设置</button>
             <button onclick="toggleAdvanced()" id="advancedToggleBtn" style="padding:4px 10px;font-size:12px;background:#667eea;color:white;border:none;border-radius:4px;cursor:pointer;">⚙️ 高级设置</button>
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:#666;">
                 <span>自动清空</span>
@@ -37,6 +38,65 @@
     <div id="status" style="display:none;">✅ 复制成功！数据已对齐，请去 Excel C 列粘贴。</div>
 
     <div id="verifyMsg"></div>
+
+    <div id="specialPanel" style="display:none;">
+        <div class="profit-settings">
+            <h3>🔧 特殊情况设置</h3>
+            <div class="tip">💡 粘贴表格行数据（Tab分隔），调整比例和押金后输出</div>
+            <textarea id="specialInput" placeholder="粘贴表格数据..." style="min-height: 80px;"></textarea>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px;">📊 比例调整</label>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 12px; color: #666;">增加</span>
+                        <input type="number" id="ratioAdjustValue" placeholder="0" style="width: 80px; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                        <span style="font-size: 12px; color: #666;">个点</span>
+                    </div>
+                    <div style="font-size: 11px; color: #999; margin-top: 4px;">例如：原比例35，输入1，变成36</div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px;">💰 押金调整</label>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="depositOption" value="none" checked style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 13px;">不调整</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="depositOption" value="zero" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 13px;">押金归零</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="depositOption" value="reduce" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 13px;">减免固定金额</span>
+                            <input type="number" id="reduceDepositValue" placeholder="减免金额" style="width: 80px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="depositOption" value="fixed" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 13px;">固定押金金额</span>
+                            <input type="number" id="fixedDepositValue" placeholder="固定金额" style="width: 80px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-box" style="margin-top: 15px;">
+                <button class="main-btn" onclick="processSpecialData()" style="background: #28a745;">🚀 处理并复制</button>
+                <button class="main-btn" onclick="convertToSimpleFormat()" style="background: #007bff; margin-left: 10px;">📝 转换为简单格式</button>
+                <button class="main-btn" onclick="clearSpecialData()" style="background: #dc3545; margin-left: 10px;">🗑️ 清空</button>
+            </div>
+
+            <div id="specialStatus" style="display:none; margin-top: 10px; padding: 10px; background: #d4edda; color: #155724; border-radius: 4px;">
+                ✅ 处理成功！数据已复制到剪贴板
+            </div>
+
+            <div style="margin-top: 15px;">
+                <h4 style="margin: 0 0 8px 0;">处理结果预览：</h4>
+                <pre id="specialPreview" style="background: #f8f9fa; padding: 12px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; max-height: 300px; overflow-y: auto; font-size: 12px; line-height: 1.6;"></pre>
+            </div>
+        </div>
+    </div>
 
     <div id="advancedPanel" style="display:none;">
 
@@ -160,26 +220,6 @@
         </div>
     </div>
 
-    <div class="profit-settings">
-        <h3>🔄 表格数据转标准格式</h3>
-        <div class="tip">💡 粘贴表格行数据（Tab分隔），自动转换为标准格式</div>
-        <textarea id="tableInput" placeholder="粘贴表格数据..." style="min-height: 80px;"></textarea>
-        <div class="btn-box">
-            <button class="main-btn" onclick="convertTableToStandard()">转换为标准格式</button>
-            <button class="main-btn" onclick="convertTableToSimple()" style="margin-left: 10px;">转换为简单数据</button>
-        </div>
-        <div id="convertStatus" style="display:none; margin-top: 10px; padding: 10px; background: #d4edda; color: #155724; border-radius: 4px;">
-            ✅ 转换成功！
-        </div>
-        <div style="margin-top: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h4 style="margin: 0;">转换结果预览：</h4>
-                <button onclick="copyConvertResult()" style="padding: 6px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">📋 一键复制</button>
-            </div>
-            <pre id="convertPreview" style="background: #f8f9fa; padding: 12px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; font-size: 13px; line-height: 1.6;"></pre>
-        </div>
-    </div>
-
     </div><!-- /advancedPanel -->
 </div>
 
@@ -206,6 +246,13 @@ function toggleAdvanced() {
     advancedOpen = !advancedOpen;
     document.getElementById('advancedPanel').style.display = advancedOpen ? 'block' : 'none';
     document.getElementById('advancedToggleBtn').textContent = advancedOpen ? '⚙️ 收起设置' : '⚙️ 高级设置';
+}
+
+let specialOpen = false;
+function toggleSpecial() {
+    specialOpen = !specialOpen;
+    document.getElementById('specialPanel').style.display = specialOpen ? 'block' : 'none';
+    document.getElementById('specialToggleBtn').textContent = specialOpen ? '🔧 收起设置' : '🔧 特殊情况设置';
 }
 
 function getAutoClearDelay() {
@@ -830,10 +877,32 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
         document.getElementById('finalRateDisplay').textContent = finalRate.toFixed(2) + '%';
         document.getElementById('customProfitRate').value = finalRate.toFixed(2);
         
-        const detailsHtml = `<div style="margin-top:10px;padding:12px;background:#f8f9fa;border-radius:6px;font-size:12px;text-align:left;line-height:1.8;border-left:3px solid #007bff;">
-          <div style="margin-bottom:8px;font-weight:600;color:#333;">${analysis.summary}</div>
-          <div style="border-top:1px solid #dee2e6;padding-top:8px;margin-top:8px;">
-            ${analysis.changes.join('<br>')}
+        const rentByRatio = Math.round(hafuCoin * 100 / analysis.finalRatio);
+        const detailsHtml = `<div style="margin-top:14px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(40,167,69,0.13);border:1.5px solid #b7e4c7;">
+          <div style="background:linear-gradient(135deg,#28a745,#20c997);padding:14px 18px;">
+            <div style="font-weight:700;color:#fff;font-size:13px;opacity:0.85;margin-bottom:6px;letter-spacing:0.5px;">📊 回收比例计算详情</div>
+            <div style="display:flex;align-items:baseline;gap:10px;">
+              <span style="font-size:36px;font-weight:900;color:#fff;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,0.15);">${recoveryRatio}</span>
+              <div style="color:rgba(255,255,255,0.9);font-size:13px;">
+                <div style="font-weight:600;">您的回收比例</div>
+                <div style="font-size:11px;opacity:0.85;">${hafuCoin}M × 100 ÷ ${customerPrice}元</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 18px;">
+            <div style="font-size:11px;font-weight:700;color:#6c757d;letter-spacing:1px;margin-bottom:10px;">🔍 计算依据</div>
+            <div style="background:#f0f9f2;border-radius:8px;padding:8px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border-left:3px solid #28a745;">
+              <span style="font-size:12px;color:#155724;font-weight:600;">📋 保险格数基础比例</span>
+              <span style="font-size:14px;font-weight:800;color:#28a745;">${analysis.base}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#495057;">
+              ${analysis.changes.map(c => `<div style="padding:6px 10px;background:#fafafa;border-radius:7px;border-left:3px solid #dee2e6;">${c}</div>`).join('')}
+            </div>
+          </div>
+          <div style="margin:0 18px 14px;padding:12px 14px;border-radius:10px;background:linear-gradient(135deg,#f0fff4,#e8f5e9);border:1px solid #c3e6cb;font-size:12px;color:#2e7d32;line-height:2;">
+            🏆 本商行比例参照市场行情制定，与各大商行基本一致。<br>
+            ⚡ 出号快、消耗快、结账快，至今零封号记录，安全有保障！<br>
+            💡 如希望调高比例可以提出，出租速度可能会慢一些，出号安全最重要～
           </div>
         </div>`;
         
@@ -845,14 +914,28 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
         } else if (priceDiff < 1.5) {
            document.getElementById('inputText').style.borderColor = '#28a745';
            document.getElementById('inputText').style.backgroundColor = '#e6ffe6';
-           msgBox.innerHTML = `<b style="font-size: 14px; color: #28a745;">✅ 验证通过</b><br><span style="color: #666; font-size: 12px;">比例: <b style="color: #667eea;">${recoveryRatio}</b> | 额外消耗品价格: <b style="color: #667eea;">${consumablesValue.toFixed(2)}元</b>${detailsHtml}</span>`;
+           msgBox.innerHTML = `<div style="background:#d4edda;padding:12px 16px;border-radius:8px;border:2px solid #28a745;">
+             <div style="font-size: 16px; color: #155724; font-weight: 700;">✅ 价格验证通过</div>
+           </div>${detailsHtml}`;
            msgBox.style.display = "block";
            inputModified = false;
            scheduleAutoClear();
         } else {
            document.getElementById('inputText').style.borderColor = '#dc3545';
            document.getElementById('inputText').style.backgroundColor = '#ffe6e6';
-           msgBox.innerHTML = `<b style="font-size: 14px; color: #dc3545;">⚠️ 价格不对</b><br><span style="color: #666; font-size: 12px;">客户: <b style="color: #667eea;">${customerPrice}元</b> | 系统: <b style="color: #667eea;">${ourPrice}元</b> | 差异: <b style="color: #dc3545;">${priceDiff.toFixed(1)}元</b><br>比例: <b style="color: #667eea;">${recoveryRatio}</b> | 额外消耗品价格: <b style="color: #667eea;">${consumablesValue.toFixed(2)}元</b>${detailsHtml}</span>`;
+           msgBox.innerHTML = `<div style="background:#f8d7da;padding:16px;border-radius:8px;border:2px solid #dc3545;">
+             <div style="font-size: 16px; color: #721c24; font-weight: 700; margin-bottom: 10px;">⚠️ 价格异常提醒</div>
+             <div style="font-size: 13px; color: #721c24; line-height: 1.8;">
+               <div style="margin-bottom:8px;padding:8px;background:#fff;border-radius:4px;">
+                 <div>💰 <b>客户报价：</b><span style="color: #dc3545; font-weight: 700;">${customerPrice}元</span></div>
+                 <div>🎯 <b>系统标准价：</b><span style="color: #28a745; font-weight: 700;">${ourPrice}元</span></div>
+                 <div>📊 <b>价格差异：</b><span style="color: #dc3545; font-weight: 700;">${priceDiff.toFixed(1)}元</span></div>
+               </div>
+               <div style="margin-bottom:6px;">📌 <b>客户回收比例：</b><span style="color: #007bff; font-weight: 700; font-size: 15px;">${recoveryRatio}</span></div>
+               <div style="font-size: 12px; color: #6c757d;">（哈夫币 ${hafuCoin}M × 100 ÷ 回收租金 ${customerPrice}元 = ${recoveryRatio}）</div>
+               ${consumablesValue > 0 ? `<div style="margin-top:8px;padding:6px 10px;background:#fff3cd;border-radius:4px;border-left:3px solid #ffc107;">💎 <b>额外消耗品价值：</b><span style="color:#856404;font-weight:700;">${consumablesValue.toFixed(2)}元</span></div>` : ''}
+             </div>
+           </div>${detailsHtml}`;
            msgBox.style.display = "block";
            inputModified = false;
            scheduleAutoClear();
@@ -860,232 +943,184 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
     }, 0);
 });
 
-async function convertTableToStandard() {
-     const inputBox = document.getElementById('tableInput');
-     const text = inputBox.value.trim();
-     
-     if (!text) {
-         alert("请粘贴表格数据！");
-         return;
-     }
-     
-     // 处理多行数据：合并所有行的Tab分隔字段
-     const lines = text.split('\n').filter(l => l.trim());
-     let allFields = [];
-     lines.forEach(line => {
-         const lineFields = line.split('\t');
-         allFields = allFields.concat(lineFields);
-     });
-     
-     const fields = allFields;
-     if (fields.length < 21) {
-         alert("数据格式不正确！请确保粘贴完整的表格行数据。");
-         return;
-     }
-     
-     // 正确的字段索引（根据表头：账号编号、哈弗币、段位、绝密kd、等级、保险、体力、负重、aw、六头、六甲、红皮/刀皮、登录、比例、租金、押金、总金额、回收比例、回收租金、利润、上架日期、电话）
-     const accountNum = fields[0] || '';
-     const hafuCoin = fields[1] || '';
-     const rank = fields[2] || '';
-     const kd = parseFloat(fields[3]) || 0;
-     const level = parseFloat(fields[4]) || 0;
-     const insuranceRaw = fields[5] || '';
-     const stamina = parseFloat(fields[6]) || 0;
-     const weight = parseFloat(fields[7]) || 0;
-     const awm = parseFloat(fields[8]) || 0;
-     const head6 = parseFloat(fields[9]) || 0;
-     const armor6 = parseFloat(fields[10]) || 0;
-     const descRaw = fields[11] || '';
-     const loginMethod = fields[12] || '';
-     const playerRatio = fields[13] || '';
-     const playerRent = parseFloat(fields[14]) || 0;
-     const deposit = parseFloat(fields[15]) || 80;
-     const totalAmount = parseFloat(fields[16]) || 0;
-     const recoveryRatio = fields[17] || '';
-     const recoveryRent = parseFloat(fields[18]) || 0;
-     const profit = parseFloat(fields[19]) || 0;
-     const uploadDate = fields[20] || '';
-     
-     // 电话号码识别：优先从合并后的字段中查找11位手机号
-     let phone = '';
-     // 先检查第21个字段（电话列）
-     if (fields[21]) {
-         const phoneMatch = fields[21].match(/1[3-9]\d{9}/);
-         if (phoneMatch) {
-             phone = phoneMatch[0];
-         }
-     }
-     // 如果没找到，从后续字段中查找
-     if (!phone) {
-         for (let i = 22; i < fields.length; i++) {
-             const field = fields[i].trim();
-             const phoneMatch = field.match(/1[3-9]\d{9}/);
-             if (phoneMatch) {
-                 phone = phoneMatch[0];
-                 break;
-             }
-         }
-     }
-     
-     // 在线时间：查找日期时间格式的字段（排除上架日期）
-     let onlineTime = '';
-     for (let i = 21; i < fields.length; i++) {
-         const field = fields[i].trim();
-         // 匹配日期时间格式，但排除已识别为电话的字段
-         if (field.match(/^\d{4}-\d{2}-\d{2}/) && field !== uploadDate) {
-             onlineTime = field;
-             break;
-         }
-     }
-     
-     
-     const insuranceMatch = insuranceRaw.match(/^(\d+)/);
-     const insurance = insuranceMatch ? insuranceMatch[1] : insuranceRaw;
-     
-     let knifeSkin = '无', redSkin = '无', goldSkin = '无', weaponSkin = '无';
-     if (descRaw && descRaw !== '无') {
-         const parts = descRaw.split(/[、,，]/);
-         parts.forEach(part => {
-             part = part.trim();
-             if (!part || part === '无') return;
-             if (part.includes('红狼') || part.includes('露娜') || part.includes('金牌')) {
-                 goldSkin = goldSkin === '无' ? part : goldSkin + '、' + part;
-             } else if (part.includes('天际线')) {
-                 redSkin = part;
-             } else if (part.includes('刀') || part.includes('匕首')) {
-                 knifeSkin = part;
-             } else {
-                 weaponSkin = weaponSkin === '无' ? part : weaponSkin + '、' + part;
-             }
-         });
-     }
-     
-     const bullet6 = parseFloat(descRaw.match(/(\d+)组/)?.[1]) || 0;
-     const coffeeBeans = parseFloat(descRaw.match(/咖啡豆[:\s]*(\d+)/)?.[1]) || 0;
-     const fullGearPack = parseFloat(descRaw.match(/全装包[:\s]*(\d+)/)?.[1]) || 0;
-     const turtleBag = parseFloat(descRaw.match(/45格乌龟包[:\s]*(\d+)/)?.[1]) || 0;
-     const consumablesValue = (awm * 0.8 + head6 * 1 + armor6 * 2 + bullet6 * 10 + coffeeBeans * 3 + fullGearPack * 3 + turtleBag * 2).toFixed(2);
-     
-     let loginText = 'VX扫码';
-     if (loginMethod.includes('qq扫码')) loginText = 'QQ扫码';
-     else if (loginMethod.includes('qq账密')) loginText = 'QQ账号密码';
-     
-     const standardFormat = `===== 米饭商行 - 三角洲租号信息 =====
-上号方式: ${loginText}
-段位: ${rank}
-绝密KD: ${kd}
-哈夫币纯币: ${hafuCoin.toUpperCase()}
-等级: ${level}
-保险格数: ${insurance}格
-打手比例: ${playerRatio}
-体力: ${stamina}
-负重: ${weight}
-AWM子弹数量: ${awm}
-6头数量: ${head6}
-6甲数量: ${armor6}
-6级子弹(组): ${bullet6}
-咖啡豆: ${coffeeBeans}
-全装包: ${fullGearPack}
-45格乌龟包: ${turtleBag}
-刀皮: ${knifeSkin}
-干员红皮: ${redSkin}
-干员金皮: ${goldSkin}
-武器皮肤: ${weaponSkin}
-联系号码: ${phone}${onlineTime ? `\n在线时间: ${onlineTime}` : ''}
-押金: ${deposit}元
-回收纯币租金: ${recoveryRent.toFixed(2)}元
-消耗品附加价值: ${consumablesValue}元
-=========================`;
-    
-    // 显示预览
-    document.getElementById('convertPreview').textContent = standardFormat;
-    
-    // 复制到剪贴板
-    try {
-        await navigator.clipboard.writeText(standardFormat);
-        const statusDiv = document.getElementById('convertStatus');
-        statusDiv.style.display = 'block';
-        setTimeout(() => {
-            statusDiv.style.display = 'none';
-        }, 3000);
-    } catch (err) {
-        alert('复制失败，请手动复制预览内容');
-    }
+function clearSpecialData() {
+    document.getElementById('specialInput').value = '';
+    document.getElementById('ratioAdjustValue').value = '';
+    document.getElementById('reduceDepositValue').value = '';
+    document.getElementById('fixedDepositValue').value = '';
+    document.querySelectorAll('input[name="depositOption"]')[0].checked = true;
+    document.getElementById('specialPreview').textContent = '';
+    document.getElementById('specialStatus').style.display = 'none';
 }
 
-async function copyConvertResult() {
-    const previewBox = document.getElementById('convertPreview');
-    const text = previewBox.textContent;
-    
-    if (!text || text.trim() === '') {
-        alert("没有可复制的内容！请先转换数据。");
+async function processSpecialData() {
+    const inputBox = document.getElementById('specialInput');
+    const text = inputBox.value.trim();
+
+    if (!text) {
+        alert("请粘贴表格数据！");
         return;
     }
-    
-    try {
-        await navigator.clipboard.writeText(text);
-        const statusDiv = document.getElementById('convertStatus');
-        statusDiv.textContent = '✅ 复制成功！';
-        statusDiv.style.display = 'block';
-        
-        // 清空输入框
-        document.getElementById('tableInput').value = '';
-        
-        setTimeout(() => {
-            statusDiv.style.display = 'none';
-            statusDiv.textContent = '✅ 转换成功！';
-        }, 2000);
-    } catch (err) {
-        alert('复制失败，请手动复制预览内容');
-    }
-}
 
-async function convertTableToSimple() {
-     const inputBox = document.getElementById('tableInput');
-     const text = inputBox.value.trim();
-     
-     if (!text) {
-         alert("请粘贴表格数据！");
-         return;
-     }
-     
-     // 处理多行数据：合并所有行的Tab分隔字段
-     const lines = text.split('\n').filter(l => l.trim());
-     let allFields = [];
-     lines.forEach(line => {
-         const lineFields = line.split('\t');
-         allFields = allFields.concat(lineFields);
-     });
-     
-     const fields = allFields;
-     if (fields.length < 21) {
-         alert("数据格式不正确！请确保粘贴完整的表格行数据。");
-         return;
-     }
-     
-     // 正确的字段索引（根据表头：账号编号、哈弗币、段位、绝密kd、等级、保险、体力、负重、aw、六头、六甲、红皮/刀皮、登录、比例、租金、押金、总金额、回收比例、回收租金、利润、上架日期、电话）
-     const accountNum = fields[0] || '';
-     const hafuCoin = fields[1] || '';
-     const insuranceRaw = fields[5] || '';
-     const stamina = parseFloat(fields[6]) || 0;
-     const weight = parseFloat(fields[7]) || 0;
-     const playerRatio = fields[13] || '';
-     const playerRent = parseFloat(fields[14]) || 0;
-     const playerDeposit = parseFloat(fields[15]) || 0;
-     const descRaw = fields[11] || '';
-     
-     const insuranceMatch = insuranceRaw.match(/^(\d+)/);
-     const insurance = insuranceMatch ? insuranceMatch[1] : insuranceRaw;
-     const coinNum = hafuCoin.replace(/[mM]/gi, '');
-     
-     let skinText = descRaw === '无' ? '无皮肤' : descRaw;
-     const simpleFormat = `编号【${accountNum}】，${coinNum}m纯币${playerRatio}比例出，租金${playerRent}押金${playerDeposit}，${insurance}格保险-${stamina}体${weight}负，${skinText}`;
-    
-    document.getElementById('convertPreview').textContent = simpleFormat;
-    
+    // 解析Tab分隔的数据，正确处理包含换行符的引号字段
+    function parseTabDelimitedLine(line) {
+        const fields = [];
+        let currentField = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            const nextChar = line[i + 1];
+
+            if (char === '"') {
+                if (inQuotes && nextChar === '"') {
+                    // 双引号转义
+                    currentField += '"';
+                    i++; // 跳过下一个引号
+                } else {
+                    // 切换引号状态
+                    inQuotes = !inQuotes;
+                }
+            } else if (char === '\t' && !inQuotes) {
+                // Tab分隔符（不在引号内）
+                fields.push(currentField);
+                currentField = '';
+            } else {
+                currentField += char;
+            }
+        }
+        fields.push(currentField); // 添加最后一个字段
+        return fields;
+    }
+
+    const fields = parseTabDelimitedLine(text);
+
+    if (fields.length < 21) {
+        alert("数据格式不正确！请确保粘贴完整的表格行数据。当前字段数：" + fields.length);
+        return;
+    }
+
+    // 解析字段（根据表头：账号编号、纯币、段位、绝密kd、等级、保险、体力、负重、aw、六头、六甲、红皮/刀皮、登录、比例、租金、押金、总金额、上架日期/在线时间、回收比例、回收租金、利润、电话）
+    const accountNum = fields[0] || '';
+    const hafuCoinRaw = fields[1] || '';
+    const rank = fields[2] || '';
+    const kd = fields[3] || '';
+    const level = fields[4] || '';
+    const insurance = fields[5] || '';
+    const stamina = fields[6] || '';
+    const weight = fields[7] || '';
+    const awm = fields[8] || '';
+    const head6 = fields[9] || '';
+    const armor6 = fields[10] || '';
+    const skins = fields[11] || '';
+    const loginMethod = fields[12] || '';
+    let playerRatio = parseFloat(fields[13]) || 0;
+    let playerRent = parseFloat(fields[14]) || 0;
+    let deposit = parseFloat(fields[15]) || 0;
+    let totalAmount = parseFloat(fields[16]) || 0;
+    const dateTimeField = fields[17] || ''; // 上架日期/在线时间在同一个单元格
+    const recoveryRatio = fields[18] || '';
+    const recoveryRent = parseFloat(fields[19]) || 0;
+    let profit = parseFloat(fields[20]) || 0;
+    const phone = fields[21] || '';
+
+    // 获取纯币数值（去掉m/M）
+    const hafuCoin = parseFloat(hafuCoinRaw.replace(/[mM]/gi, '')) || 0;
+
+    // 获取调整设置
+    const ratioAdjust = parseFloat(document.getElementById('ratioAdjustValue').value) || 0;
+    const depositOption = document.querySelector('input[name="depositOption"]:checked').value;
+
+    // 保存原始押金用于显示
+    const originalDeposit = deposit;
+
+    // 1. 处理比例调整
+    if (ratioAdjust !== 0) {
+        playerRatio = playerRatio + ratioAdjust;
+        // 重新计算租金：租金 = 纯币数量 * 100 / 比例，取整
+        playerRent = Math.ceil(hafuCoin * 100 / playerRatio);
+        // 重新计算利润
+        profit = playerRent - recoveryRent;
+    }
+
+    // 2. 处理押金调整
+    if (depositOption === 'zero') {
+        deposit = 0;
+    } else if (depositOption === 'reduce') {
+        const reduceAmount = parseFloat(document.getElementById('reduceDepositValue').value);
+        if (!isNaN(reduceAmount) && reduceAmount > 0) {
+            deposit = Math.max(0, deposit - reduceAmount);
+        }
+    } else if (depositOption === 'fixed') {
+        const fixedAmount = parseFloat(document.getElementById('fixedDepositValue').value);
+        if (!isNaN(fixedAmount) && fixedAmount >= 0) {
+            deposit = fixedAmount;
+        }
+    }
+
+    // 3. 重新计算总金额
+    totalAmount = playerRent + deposit;
+
+    // 构建输出数据（保持原格式）
+    const outputFields = [
+        accountNum,
+        hafuCoinRaw,
+        rank,
+        kd,
+        level,
+        insurance,
+        stamina,
+        weight,
+        awm,
+        head6,
+        armor6,
+        skins,
+        loginMethod,
+        playerRatio,
+        playerRent,
+        deposit,
+        totalAmount,
+        dateTimeField, // 上架日期/在线时间保持原样
+        recoveryRatio,
+        recoveryRent,
+        profit,
+        phone
+    ];
+
+    // 处理包含换行符的字段（用引号包裹）
+    const finalString = outputFields.map(v => {
+        const s = String(v ?? '');
+        return s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+    }).join('\t');
+
+    // 显示预览
+    let depositChangeText = '';
+    if (depositOption === 'zero') {
+        depositChangeText = `押金: ${originalDeposit} → 0 (归零)`;
+    } else if (depositOption === 'reduce') {
+        const reduceAmount = parseFloat(document.getElementById('reduceDepositValue').value) || 0;
+        depositChangeText = `押金: ${originalDeposit} → ${deposit} (减免${reduceAmount})`;
+    } else if (depositOption === 'fixed') {
+        depositChangeText = `押金: ${originalDeposit} → ${deposit} (固定金额)`;
+    } else {
+        depositChangeText = `押金: ${deposit} (未调整)`;
+    }
+
+    const previewText = `调整后的数据：
+${ratioAdjust !== 0 ? `比例: ${playerRatio - ratioAdjust} → ${playerRatio} (增加${ratioAdjust})` : `比例: ${playerRatio} (未调整)`}
+租金: ${playerRent}
+${depositChangeText}
+总金额: ${totalAmount}
+利润: ${profit}
+
+完整数据已复制到剪贴板，可直接粘贴到Excel`;
+
+    document.getElementById('specialPreview').textContent = previewText;
+
+    // 复制到剪贴板
     try {
-        await navigator.clipboard.writeText(simpleFormat);
-        const statusDiv = document.getElementById('convertStatus');
+        await navigator.clipboard.writeText(finalString);
+        const statusDiv = document.getElementById('specialStatus');
         statusDiv.style.display = 'block';
         setTimeout(() => {
             statusDiv.style.display = 'none';
@@ -1094,6 +1129,84 @@ async function convertTableToSimple() {
         alert('复制失败，请手动复制预览内容');
     }
 }
+
+async function convertToSimpleFormat() {
+    const inputBox = document.getElementById('specialInput');
+    const text = inputBox.value.trim();
+
+    if (!text) {
+        alert("请粘贴表格数据！");
+        return;
+    }
+
+    // 解析Tab分隔的数据，正确处理包含换行符的引号字段
+    function parseTabDelimitedLine(line) {
+        const fields = [];
+        let currentField = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            const nextChar = line[i + 1];
+
+            if (char === '"') {
+                if (inQuotes && nextChar === '"') {
+                    currentField += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (char === '\t' && !inQuotes) {
+                fields.push(currentField);
+                currentField = '';
+            } else {
+                currentField += char;
+            }
+        }
+        fields.push(currentField);
+        return fields;
+    }
+
+    const fields = parseTabDelimitedLine(text);
+
+    if (fields.length < 21) {
+        alert("数据格式不正确！请确保粘贴完整的表格行数据。");
+        return;
+    }
+
+    const accountNum = fields[0] || '';
+    const hafuCoin = fields[1] || '';
+    const insuranceRaw = fields[5] || '';
+    const stamina = parseFloat(fields[6]) || 0;
+    const weight = parseFloat(fields[7]) || 0;
+    const playerRatio = fields[13] || '';
+    const playerRent = parseFloat(fields[14]) || 0;
+    const playerDeposit = parseFloat(fields[15]) || 0;
+    const descRaw = fields[11] || '';
+
+    const insuranceMatch = insuranceRaw.match(/^(\d+)/);
+    const insurance = insuranceMatch ? insuranceMatch[1] : insuranceRaw;
+    const coinNum = hafuCoin.replace(/[mM]/gi, '');
+
+    let skinText = descRaw === '无' ? '无皮肤' : descRaw;
+    const simpleFormat = `编号【${accountNum}】，${coinNum}m纯币${playerRatio}比例出，租金${playerRent}押金${playerDeposit}，${insurance}格保险-${stamina}体${weight}负，${skinText}`;
+
+    document.getElementById('specialPreview').textContent = simpleFormat;
+
+    try {
+        await navigator.clipboard.writeText(simpleFormat);
+        const statusDiv = document.getElementById('specialStatus');
+        statusDiv.textContent = '✅ 转换成功！已复制到剪贴板';
+        statusDiv.style.display = 'block';
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+            statusDiv.textContent = '✅ 处理成功！数据已复制到剪贴板';
+        }, 3000);
+    } catch (err) {
+        alert('复制失败，请手动复制预览内容');
+    }
+}
+
 
 </script>
 </body>

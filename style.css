@@ -1,40 +1,41 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-.container { max-width: 600px; margin: auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); position: relative; }
+.container { max-width: 620px; margin: auto; background: #f8f9fc; padding: 32px 36px; border-radius: 24px; box-shadow: 0 24px 80px rgba(0,0,0,0.18); position: relative; }
 
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-h2 { color: #667eea; font-size: 24px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; padding-bottom: 16px; border-bottom: 2px solid #eef0f6; }
+h2 { color: #667eea; font-size: 22px; letter-spacing: 1px; }
 .header button { transition: all 0.3s ease; }
 .header button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important; }
 
-.profit-settings { margin-top: 30px; padding: 15px; border-radius: 12px; border-top: 2px solid #f0f2f5; }
-.profit-settings h3 { color: #667eea; margin-bottom: 15px; font-size: 16px; }
+.profit-settings { margin-top: 24px; padding: 18px; border-radius: 14px; background: #fff; border: 1.5px solid #eef0f6; box-shadow: 0 2px 8px rgba(102,126,234,0.06); }
+.profit-settings h3 { color: #667eea; margin-bottom: 14px; font-size: 15px; }
 .profit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .profit-field { }
-.profit-field label { display: block; font-size: 11px; color: #666; margin-bottom: 4px; font-weight: 600; }
-.profit-field input { width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; }
-.profit-field input:focus { outline: none; border-color: #667eea; }
+.profit-field label { display: block; font-size: 11px; color: #888; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.profit-field input { width: 100%; padding: 7px 8px; border: 1.5px solid #e8eef5; border-radius: 8px; font-size: 12px; background: #f8f9fc; transition: border-color 0.2s; }
+.profit-field input:focus { outline: none; border-color: #667eea; background: #fff; }
 .input-group { display: flex; align-items: center; gap: 3px; }
 .input-group input { flex: 1; }
 .input-group span { color: #667eea; font-size: 11px; font-weight: bold; }
 
-.tip { background: #e8f4f8; color: #0066cc; padding: 12px 15px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; border-left: 4px solid #667eea; line-height: 1.6; }
-textarea { width: 100%; height: 120px; margin-bottom: 20px; padding: 15px; border: 2px solid #e8eef5; border-radius: 12px; box-sizing: border-box; font-size: 14px; outline: none; font-family: inherit; }
-textarea:focus { border-color: #e8eef5; }
+.tip { background: linear-gradient(90deg, #eef2ff, #f3efff); color: #4a5ab9; padding: 11px 15px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; border-left: 4px solid #667eea; line-height: 1.6; }
+textarea { width: 100%; height: 120px; margin-bottom: 16px; padding: 14px; border: 2px solid #e8eef5; border-radius: 14px; box-sizing: border-box; font-size: 14px; outline: none; font-family: inherit; background: #fff; transition: border-color 0.25s, box-shadow 0.25s; resize: vertical; }
+textarea:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.12); }
 
-.btn-box { text-align: center; }
-button.main-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px 50px; cursor: pointer; border-radius: 50px; font-size: 16px; font-weight: bold; transition: all 0.3s; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
-button.main-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6); }
+.btn-box { text-align: center; margin-bottom: 4px; }
+button.main-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 28px; cursor: pointer; border-radius: 50px; font-size: 15px; font-weight: bold; transition: all 0.25s; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35); }
+button.main-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(102, 126, 234, 0.45); }
+button.main-btn:active { transform: translateY(0); }
 
-#status { margin-top: 20px; padding: 15px; border-radius: 10px; text-align: center; display: none; font-weight: bold; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+#status { margin-top: 16px; padding: 13px 16px; border-radius: 12px; text-align: center; display: none; font-weight: bold; background: #d4edda; color: #155724; border: 1.5px solid #b8dfca; }
 
-.verify-section { margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f2f5; }
+.verify-section { margin-top: 28px; padding-top: 20px; border-top: 2px solid #eef0f6; }
 .verify-section h3 { color: #667eea; margin-bottom: 15px; font-size: 16px; }
 .verify-box-container { text-align: center; }
 #verifyBox { width: 80px; height: 80px; margin: 0 auto; border: 2px solid #e8eef5; border-radius: 15px; font-size: 40px; text-align: center; cursor: pointer; transition: all 0.3s; background: white; padding: 0; }
 #verifyBox:hover { border-color: #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2); }
 .verify-box-container p { margin-top: 12px; color: #999; font-size: 12px; }
-#verifyMsg { margin-top: 15px; padding: 12px 0; font-size: 13px; display: none; text-align: left; background: transparent; line-height: 1.8; animation: slideIn 0.3s ease-out; }
+#verifyMsg { margin-top: 16px; padding: 0; font-size: 13px; display: none; text-align: left; background: transparent; line-height: 1.8; animation: slideIn 0.35s cubic-bezier(.22,.68,0,1.2); }
 #verifyMsg b { color: #667eea; font-weight: 700; font-size: 14px; }
 #verifyMsg br { margin: 4px 0; }
-@keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }

@@ -253,7 +253,7 @@ function analyzeRatio(cfg, p) {
   if (finalRatio < 36) finalRatio = 36;
   
   const rentPrice = Math.round((hafuM * 100) / finalRatio);
-  let summary = `<b style="font-size:15px;color:#007bff">${finalRatio}比例 = ${rentPrice}元</b>`;
+  let summary = `<b style="font-size:15px;color:#007bff">系统比例 ${finalRatio} = ${rentPrice}元</b>`;
   if (notes.length > 0) {
     summary += `<br><span style="color:#6c757d;font-size:12px">📝 ${notes.join('、')}</span>`;
   }
