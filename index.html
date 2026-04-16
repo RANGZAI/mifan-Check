@@ -465,7 +465,7 @@ async function parseAndCopy() {
         '上号方式': /上号方式:\s*(.*?)(?:\n|$)/,
         '联系号码': /联系号码:\s*(\d+)(?:[^\d]*?\(([^)]+)\))?/,
         '在线时间': /在线时间:\s*(.*?)(?:\n|$)/,
-        '租金': /回收(?:纯币)?租金:\s*([\d\.]+)/,
+        '租金': /回收(?:纯币)?租金(?:[（(]特惠[)）])?:\s*([\d\.]+)/,
         '押金': /押金:\s*([\d\.]+)/
     };
 
@@ -473,6 +473,9 @@ async function parseAndCopy() {
         const match = text.match(patterns[key]);
         data[key] = (match && match[1]) ? match[1].trim() : "";
     }
+    
+    // 检测是否为特惠账号
+    const isSpecialOffer = /回收(?:纯币)?租金[（(]特惠[)）]/.test(text);
     
     const fieldsToFillZero = ['AW', '六头', '六甲', 'KD'];
     fieldsToFillZero.forEach(field => {
@@ -505,6 +508,15 @@ async function parseAndCopy() {
 
     const skinList = [data['刀皮'], data['红皮'], data['金皮'], data['武器皮肤']].filter(s => s && s !== '无');
     let skinStr = skinList.join(' / ') || '无';
+    
+    // 如果是特惠账号，添加标记
+    if (isSpecialOffer) {
+        if (skinStr === '无') {
+            skinStr = '特惠账号';
+        } else {
+            skinStr = skinStr + '\n（特惠账号）';
+        }
+    }
 
     let login = 'vx扫码';
     const loginMethod = data['上号方式'];
@@ -533,11 +545,11 @@ async function parseAndCopy() {
     
     lastParsedData = {
         data, PROFIT_CONFIG, recoveryRent, finalRate, baseRate, bonusRate, pureCoins,
-        finalIns, skinStr, login, timeStr, now, rarityBonus, cardCoversRent
+        finalIns, skinStr, login, timeStr, now, rarityBonus, cardCoversRent, isSpecialOffer
     };
     
     saveSettings();
-    performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent);
+    performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent, isSpecialOffer);
 }
 
 function calcDisplayRatioAndRent(pureCoins, rawRent, rarityBonus) {
@@ -550,7 +562,7 @@ function calcDisplayRatioAndRent(pureCoins, rawRent, rarityBonus) {
      return { playerRatio: displayRatio, playerRent };
 }
 
-function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent) {
+function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent, isSpecialOffer) {
      let playerRatio, playerRent, ownerRatio, profit, deposit;
 
      // 体验卡覆盖租期时，打手比例按9格标准计算
@@ -689,8 +701,8 @@ function performParse(finalRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, f
 async function regenerateWithCustomRate() {
     if (lastParsedData) {
         const customRate = parseFloat(document.getElementById('customProfitRate').value) / 100;
-        const { data, PROFIT_CONFIG, recoveryRent, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent } = lastParsedData;
-        performParse(customRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent);
+        const { data, PROFIT_CONFIG, recoveryRent, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent, isSpecialOffer } = lastParsedData;
+        performParse(customRate, recoveryRent, data, PROFIT_CONFIG, pureCoins, finalIns, skinStr, login, timeStr, rarityBonus, cardCoversRent, isSpecialOffer);
     } else if (lastVerifyData) {
         const customRate = parseFloat(document.getElementById('customProfitRate').value) / 100;
         const { hafuCoin, customerPrice, rarityBonus: vRarity } = lastVerifyData;
@@ -757,7 +769,11 @@ document.getElementById('inputText').addEventListener('paste', function(e) {
            '联系号码': 'contactNumber',
            '押金': 'deposit',
            '回收租金': 'customerPrice',
-           '回收纯币租金': 'customerPrice'
+           '回收纯币租金': 'customerPrice',
+           '回收租金（特惠）': 'customerPrice',
+           '回收租金(特惠)': 'customerPrice',
+           '回收纯币租金（特惠）': 'customerPrice',
+           '回收纯币租金(特惠)': 'customerPrice'
         };
         
         const data = {};
